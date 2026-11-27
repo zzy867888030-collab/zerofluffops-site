@@ -1,0 +1,107 @@
+{
+  "name": "Zero-Fluff Ops #004 — Credit-Free Notion Doc Summarizer (n8n Self-Hosted / Cloud)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "databaseId": "YOUR_NOTION_DATABASE_ID"
+      },
+      "id": "notion-trigger",
+      "name": "Notion Trigger (Watch Database)",
+      "type": "n8n-nodes-base.notionTrigger",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.properties['AI Status'].select.name }}",
+              "operation": "equals",
+              "value2": "Queue Summary"
+            },
+            {
+              "value1": "={{ $json.last_edited_by.name }}",
+              "operation": "notEqual",
+              "value2": "Automation Bot"
+            }
+          ]
+        }
+      },
+      "id": "loop-guardrail",
+      "name": "Filter: Loop & Status Guardrail",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "block",
+        "operation": "getAll",
+        "blockId": "={{ $json.id }}",
+        "returnAll": true
+      },
+      "id": "fetch-blocks",
+      "name": "Fetch Notion Page Blocks",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [700, 280]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": { "responseFormat": "json_object" },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Summarize into strict JSON: {\"tldr_3_bullets\": \"...\", \"action_items\": \"...\", \"category_tag\": \"Normal|Urgent\"}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $items().map(i => i.json.content || '').join('\\n') }}"
+            }
+          ]
+        }
+      },
+      "id": "byo-llm",
+      "name": "BYO-Key LLM Summarizer",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [940, 280]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": "={{ $node['Notion Trigger (Watch Database)'].json.id }}",
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "AI Status|select", "selectValue": "Done" },
+            { "key": "Summary|rich_text", "textContent": "={{ $json.tldr_3_bullets }}" }
+          ]
+        }
+      },
+      "id": "write-back",
+      "name": "Update Notion & Flip Status Done",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [1180, 280]
+    }
+  ],
+  "connections": {
+    "Notion Trigger (Watch Database)": {
+      "main": [[{ "node": "Filter: Loop & Status Guardrail", "type": "main", "index": 0 }]]
+    },
+    "Filter: Loop & Status Guardrail": {
+      "main": [[{ "node": "Fetch Notion Page Blocks", "type": "main", "index": 0 }], []]
+    },
+    "Fetch Notion Page Blocks": {
+      "main": [[{ "node": "BYO-Key LLM Summarizer", "type": "main", "index": 0 }]]
+    },
+    "BYO-Key LLM Summarizer": {
+      "main": [[{ "node": "Update Notion & Flip Status Done", "type": "main", "index": 0 }]]
+    }
+  }
+}

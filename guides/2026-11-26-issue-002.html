@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipedream Is Shutting Down: Where to Move Your Workflows (Make.com vs. Zapier vs. n8n) | Zero-Fluff Ops</title>
+  <meta name="description" content="Pipedream Workflows sunsets March 31, 2027—here is the honest migration matrix, plus a 15-minute AI Meeting Notes → Notion &amp; CRM recipe." />
+  <link rel="canonical" href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-26-issue-002.html" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="../index.html">
+        <span>Zero-Fluff Ops</span>
+        <span class="brand-badge">2026 TOOLS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../blueprints/index.html">Templates (.JSON)</a>
+        <a href="../guides/index.html">Guides</a>
+        <a class="hide-mobile" href="../compare/make-vs-zapier.html">Comparisons</a>
+        <a class="btn-nav" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Free Newsletter →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container article-wrap">
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;"><a href="index.html">← All Workflow Blueprints &amp; Guides</a> · <span>2026-11-26</span></p>
+    <h1>Pipedream Is Shutting Down: Where to Move Your Workflows (Make.com vs. Zapier vs. n8n)</h1>
+    <p style="color:#94a3b8;font-size:17px;">Pipedream Workflows sunsets March 31, 2027—here is the honest migration matrix, plus a 15-minute AI Meeting Notes → Notion &amp; CRM recipe.</p>
+
+    <div class="blueprint-box">
+      <span class="pill" style="margin-bottom:10px;">READY-TO-IMPORT WORKFLOW TEMPLATES</span>
+      <h3>Download &amp; Run This Blueprint in 2 Minutes</h3>
+      <p>Grab the pre-configured JSON file below, then import it into Make.com (cloud visual canvas) or a 1-click self-hosted n8n server:</p>
+      <div class="cta-strip" style="margin:14px 0;">
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__MAKE_BP, '2026-11-26-issue-002-make-blueprint.json')">⬇ Download Make.com Blueprint (.json)</button>
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__N8N_BP, '2026-11-26-issue-002-n8n-workflow.json')">⬇ Download n8n Workflow (.json)</button>
+      </div>
+      <div class="cta-strip" style="margin:12px 0 0;">
+        <a class="cta-btn cta-make" href="../go/make.html?src=bp-2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Step 1A: Get Make Free (10k Ops Promo) →</a>
+        <a class="cta-btn cta-vps" href="../go/vps.html?src=bp-2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Step 1B: Deploy 1-Click n8n VPS (~$6/mo) →</a>
+      </div>
+    </div>
+    <script>
+    window.__MAKE_BP = "{\n  \"name\": \"Zero-Fluff Ops #002 \u2014 15-Minute AI Meeting Notes to Notion & CRM Logger\",\n  \"flow\": [\n    {\n      \"id\": 1,\n      \"module\": \"gateway:CustomWebHook\",\n      \"version\": 1,\n      \"mapper\": {},\n      \"metadata\": {\n        \"designer\": { \"x\": 0, \"y\": 0 },\n        \"notes\": \"Receive meeting summary payload from Fathom, Granola, or Fireflies.\"\n      }\n    },\n    {\n      \"id\": 2,\n      \"module\": \"builtin:BasicRouter\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Ignore Internal & <5 Min Calls\",\n        \"conditions\": [[{ \"a\": \"{{1.duration_minutes}}\", \"b\": \"5\", \"o\": \"number:greater\" }]]\n      },\n      \"routes\": [\n        {\n          \"flow\": [\n            {\n              \"id\": 3,\n              \"module\": \"notion:createDatabaseItem\",\n              \"version\": 1,\n              \"mapper\": {\n                \"databaseId\": \"YOUR_CLIENT_MEETINGS_DB_ID\",\n                \"Title\": \"{{1.meeting_title}}\",\n                \"Summary\": \"{{1.ai_summary}}\",\n                \"Action Items\": \"{{1.action_items}}\",\n                \"Recording URL\": \"{{1.recording_url}}\"\n              }\n            }\n          ]\n        },\n        {\n          \"flow\": [\n            {\n              \"id\": 4,\n              \"module\": \"slack:createMessage\",\n              \"version\": 1,\n              \"filter\": {\n                \"name\": \"Alert Only on Blocker or Renewal Risk\",\n                \"conditions\": [[{ \"a\": \"{{lower(1.ai_summary)}}\", \"b\": \"risk\", \"o\": \"text:contain\" }]]\n              },\n              \"mapper\": {\n                \"channel\": \"#client-updates\",\n                \"text\": \"Client Alert ({{1.meeting_title}}): {{1.ai_summary}}\"\n              }\n            }\n          ]\n        }\n      ],\n      \"metadata\": { \"designer\": { \"x\": 320, \"y\": 0 } }\n    }\n  ],\n  \"metadata\": { \"version\": 1, \"author\": \"Zero-Fluff Ops (zerofluffops.substack.com)\" }\n}\n";
+    window.__N8N_BP = "{\n  \"name\": \"Zero-Fluff Ops #002 \u2014 AI Meeting Notes to Notion & CRM Logger (n8n)\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"meeting-notes-webhook\",\n        \"responseMode\": \"onReceived\"\n      },\n      \"id\": \"webhook-trigger\",\n      \"name\": \"Webhook: Fathom / Granola Meeting Summary\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [220, 300]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"string\": [\n            {\n              \"value1\": \"={{ $json.body.attendee_emails }}\",\n              \"operation\": \"notContains\",\n              \"value2\": \"@yourcompany.com\"\n            }\n          ],\n          \"number\": [\n            {\n              \"value1\": \"={{ $json.body.duration_minutes }}\",\n              \"operation\": \"largerEqual\",\n              \"value2\": 5\n            }\n          ]\n        }\n      },\n      \"id\": \"internal-filter\",\n      \"name\": \"Filter: External Client Calls >= 5 Min\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"databasePage\",\n        \"operation\": \"create\",\n        \"databaseId\": \"YOUR_NOTION_MEETING_HUB_DB_ID\",\n        \"title\": \"={{ $json.body.meeting_title }} ({{ $json.body.meeting_date }})\",\n        \"propertiesUi\": {\n          \"propertyValues\": [\n            { \"key\": \"Summary|rich_text\", \"textContent\": \"={{ $json.body.ai_summary }}\" },\n            { \"key\": \"Action Items|rich_text\", \"textContent\": \"={{ $json.body.action_items }}\" },\n            { \"key\": \"Recording URL|url\", \"urlValue\": \"={{ $json.body.recording_url }}\" }\n          ]\n        }\n      },\n      \"id\": \"notion-meeting\",\n      \"name\": \"Notion: Log Client Meeting Page\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [740, 200]\n    },\n    {\n      \"parameters\": {\n        \"method\": \"POST\",\n        \"url\": \"https://api.hubapi.com/crm/v3/objects/notes\",\n        \"sendHeaders\": true,\n        \"headerParameters\": {\n          \"parameters\": [\n            { \"name\": \"Authorization\", \"value\": \"Bearer YOUR_CRM_API_TOKEN\" },\n            { \"name\": \"Content-Type\", \"value\": \"application/json\" }\n          ]\n        },\n        \"sendBody\": true,\n        \"specifyBody\": \"json\",\n        \"jsonBody\": \"={\\\"properties\\\": {\\\"hs_note_body\\\": \\\"AI Meeting Summary: {{ $json.body.ai_summary }}\\\\nAction Items: {{ $json.body.action_items }}\\\\nRecording: {{ $json.body.recording_url }}\\\"}}\"\n      },\n      \"id\": \"crm-note\",\n      \"name\": \"CRM: Attach Meeting Note (HubSpot / Attio)\",\n      \"type\": \"n8n-nodes-base.httpRequest\",\n      \"typeVersion\": 4,\n      \"position\": [740, 420]\n    }\n  ],\n  \"connections\": {\n    \"Webhook: Fathom / Granola Meeting Summary\": { \"main\": [[{ \"node\": \"Filter: External Client Calls >= 5 Min\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Filter: External Client Calls >= 5 Min\": {\n      \"main\": [[\n        { \"node\": \"Notion: Log Client Meeting Page\", \"type\": \"main\", \"index\": 0 },\n        { \"node\": \"CRM: Attach Meeting Note (HubSpot / Attio)\", \"type\": \"main\", \"index\": 0 }\n      ]]\n    }\n  }\n}\n";
+    function downloadBp(content, filename) {
+      var blob = new Blob([content], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    </script>
+      <p>If you have automations running on <strong>Pipedream Workflows</strong> (or its AI agent builder, String), your migration clock just started ticking.</p>
+      <p>Pipedream is shutting down Workflows on <strong>March 31, 2027</strong>, with all workflow data permanently deleted by <strong>April 30, 2027</strong>. Waiting until the final week to rebuild brittle webhooks and API glue is how teams break billing and lead routing overnight.</p>
+      <p>The good news: the no-code and AI automation landscape in late 2026 is much cleaner than it was two years ago. Here is the honest migration verdict across the three best landing pads, how to avoid overpaying when you move, and one high-ROI workflow you can deploy in 15 minutes today.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>1. The Migration Verdict: Where Should Your Workflows Go?</h2>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/make.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Make.com</a> — Best Overall Replacement for Visual Multi-Branch Ops</h3>
+      <p>If you used Pipedream to connect CRMs, webhooks, Notion, Slack, and LLM steps without maintaining servers, <strong><a href="../go/make.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Make.com</a></strong> is the fastest high-leverage upgrade.</p>
+      <ul>
+        <li><strong>Why ops teams land here:</strong> Make&#x27;s visual router lets you inspect every JSON bundle, add filters <em>before</em> expensive AI calls, and run multi-branch logic at a fraction of per-task pricing. With expanded MCP toolboxes and native support for the latest Gemini, GPT, and Claude models, it handles structured AI workflows cleanly.</li>
+        <li><strong>Migration tip:</strong> Replace any polling triggers with instant webhooks and add an early filter module on step 2 so junk events never burn operations.</li>
+        <li><strong>The honest con:</strong> If your Pipedream flows relied heavily on custom npm/Python packages inside code steps, Make&#x27;s native JavaScript/HTTP modules are more constrained—you&#x27;ll need external endpoints or n8n for heavy custom code.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/zapier.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Zapier</a> — Best for Speed, Zero Maintenance &amp; 9,000+ App Connectors</h3>
+      <p><strong><a href="../go/zapier.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Zapier</a></strong> has repositioned hard into an AI orchestration platform—folding standalone agents directly into standard Zaps as unified &quot;AI steps&quot; and rolling out self-healing error recovery in Next Gen Zaps.</p>
+      <ul>
+        <li><strong>Why non-technical teams pick it:</strong> Unmatched connector breadth (9,000+ apps). If your Pipedream stack was mostly standard SaaS-to-SaaS syncs and you want the lowest setup friction, Zapier gets you live in an afternoon.</li>
+        <li><strong>The honest con:</strong> Per-task pricing scales painfully on high-volume multi-step flows. A 6-step workflow running 500 times a day will blow past entry tiers fast.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/n8n.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">n8n</a> — Best for Code-Heavy Pipedream Power Users</h3>
+      <p>If the main reason you loved Pipedream was dropping raw JavaScript/Python code right next to webhooks and AI agents, <strong><a href="../go/n8n.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">n8n</a></strong> is your closest spiritual successor.</p>
+      <ul>
+        <li><strong>Why technical builders migrate here:</strong> Full Code nodes, flat execution pricing (or free self-hosting), and strong production observability—including OpenTelemetry tracing and audit logs for AI agent tool calls as n8n moves toward 3.0.</li>
+        <li><strong>The honest con:</strong> You own the maintenance if you self-host (especially keeping up with security patches on Docker/npm instances), and non-technical teammates rarely enjoy editing n8n canvases.</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>2. Quick Migration Matrix</h2>
+      <ul>
+        <li><strong>Multi-branch business ops, webhooks + AI, best cost-to-speed ratio</strong> → Move to <strong><a href="../go/make.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Make.com</a></strong></li>
+        <li><strong>Maximum SaaS app coverage, simple linear flows, zero DevOps</strong> → Move to <strong><a href="../go/zapier.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Zapier</a></strong></li>
+        <li><strong>Heavy custom code steps, complex AI agents, self-hosting control</strong> → Move to <strong><a href="../go/n8n.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">n8n</a></strong></li>
+        <li><strong>Centralized client knowledge base &amp; post-meeting AI memory</strong> → Pair with <strong><a href="../go/notion.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Notion</a></strong></li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>3. Copy-Paste Workflow of the Day: The 15-Minute AI Meeting Notes → Notion &amp; CRM Logger</h2>
+      <p>While you&#x27;re auditing your automation stack, kill the single most hated manual task on every team: copying meeting takeaways into your workspace and CRM.</p>
+      <p>Build this in 15 minutes using <strong><a href="../go/make.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Make.com</a></strong> + <strong><a href="../go/notion.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Notion</a></strong> (plus HubSpot/Attio/Salesforce):</p>
+      <ol>
+        <li><strong>Trigger (Webhook):</strong> Fire whenever your AI note-taker (Fathom, Granola, or Fireflies) finishes a meeting summary.</li>
+        <li><strong>Filter (Save Credits):</strong> Ignore internal <code>@yourcompany.com</code> calendar events and short &lt;5-minute check-ins <em>before</em> any downstream step runs.</li>
+        <li><strong>Router (2 Parallel Branches):</strong></li>
+      </ol>
+      <ul>
+        <li><strong>Branch A — <a href="../go/notion.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Notion</a> Meeting Hub:</strong> Create a structured page in your &quot;Client Meetings&quot; database with Date, Attendees, AI Summary, Action Items (as checkboxes), and the recording URL.</li>
+        <li><strong>Branch B — CRM Activity Note:</strong> Search your CRM by attendee email domain, then attach the cleaned summary + next steps directly to the matching Contact and Deal record.</li>
+      </ul>
+      <ol>
+        <li><strong>Optional Team Ping:</strong> Only post a 3-line recap to Slack (<code>#client-updates</code>) if the AI summary flags a renewal risk, deal blocker, or new scope request.</li>
+      </ol>
+      <p><strong>Result:</strong> Zero manual CRM data entry, every client call automatically indexed in <strong><a href="../go/notion.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Notion</a></strong>, and your team only gets pinged when something actually needs attention.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>One Tool Worth Watching Today</h2>
+      <p>If your meeting action items keep dying inside static notes instead of turning into owned tasks, look at <strong><a href="../go/clickup.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">ClickUp</a></strong>. Pairing a <strong><a href="../go/make.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">Make.com</a></strong> webhook with <strong><a href="../go/clickup.html?src=2026-11-26-issue-002" target="_blank" rel="noopener sponsored">ClickUp</a></strong> lets you auto-create assigned tasks with due dates straight from client call summaries—no more &quot;who owned that follow-up?&quot; threads.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Migrating off Pipedream or rebuilding a messy workflow this week? Hit reply with the ugliest multi-step flow you&#x27;re trying to replace—I&#x27;ll map out a clean replacement blueprint in an upcoming issue.</em></p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Disclosure: Some links in this issue are affiliate links, meaning I may earn a small commission at no extra cost to you if you choose to upgrade. I only feature tools I actually test and recommend for real workflows.</em></p>
+
+    <div class="newsletter-box" style="margin-top:36px;">
+      <h2>Get New Tested Blueprints Twice a Week</h2>
+      <p>Join <strong>Zero-Fluff Ops</strong> free on Substack for real cost math, honest tool verdicts, and copy-paste JSON workflows.</p>
+      <div class="cta-strip" style="justify-content:center;margin-bottom:0;">
+        <a class="btn-primary" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Subscribe Free on Substack →</a>
+        <a class="cta-btn cta-neutral" href="../index.html">Model Your Cost in Calculator →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div><strong>Zero-Fluff Ops</strong> — Practical no-code &amp; AI workflow blueprints and cost benchmarks. <a href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Read the Brief</a> · <a href="../index.html">Cost Calculator</a> · <a href="../blueprints/index.html">JSON Templates</a> · <a href="../guides/index.html">Guides</a></div>
+      <p class="disclosure">Disclosure: Pricing tiers are 2026 public-plan estimates for comparison purposes. Some outbound links (including /go/ partner links) are affiliate links, meaning we may earn a commission at no extra cost to you if you upgrade. We never run paid ads on brand keywords and only recommend tools we test in real workflows.</p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "42ffdf8149ba4edf8e775fddfcb73aed"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

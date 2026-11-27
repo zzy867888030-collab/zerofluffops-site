@@ -1,0 +1,61 @@
+{
+  "name": "Zero-Fluff Ops #002 — 15-Minute AI Meeting Notes to Notion & CRM Logger",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "notes": "Receive meeting summary payload from Fathom, Granola, or Fireflies."
+      }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "filter": {
+        "name": "Ignore Internal & <5 Min Calls",
+        "conditions": [[{ "a": "{{1.duration_minutes}}", "b": "5", "o": "number:greater" }]]
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "notion:createDatabaseItem",
+              "version": 1,
+              "mapper": {
+                "databaseId": "YOUR_CLIENT_MEETINGS_DB_ID",
+                "Title": "{{1.meeting_title}}",
+                "Summary": "{{1.ai_summary}}",
+                "Action Items": "{{1.action_items}}",
+                "Recording URL": "{{1.recording_url}}"
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "slack:createMessage",
+              "version": 1,
+              "filter": {
+                "name": "Alert Only on Blocker or Renewal Risk",
+                "conditions": [[{ "a": "{{lower(1.ai_summary)}}", "b": "risk", "o": "text:contain" }]]
+              },
+              "mapper": {
+                "channel": "#client-updates",
+                "text": "Client Alert ({{1.meeting_title}}): {{1.ai_summary}}"
+              }
+            }
+          ]
+        }
+      ],
+      "metadata": { "designer": { "x": 320, "y": 0 } }
+    }
+  ],
+  "metadata": { "version": 1, "author": "Zero-Fluff Ops (zerofluffops.substack.com)" }
+}

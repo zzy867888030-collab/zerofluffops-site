@@ -1,0 +1,119 @@
+{
+  "name": "Zero-Fluff Ops #004 — Credit-Free Notion Doc & SOP AI Summarizer (BYO API Key)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "notion:watchDatabaseItems",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "databaseId": "YOUR_NOTION_DATABASE_ID"
+      },
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "notes": "Step 1: Trigger when a Notion page's AI Status is set to 'Queue Summary'."
+      }
+    },
+    {
+      "id": 2,
+      "module": "notion:listPageContents",
+      "version": 1,
+      "filter": {
+        "name": "Loop & Status Guardrail",
+        "conditions": [
+          [
+            {
+              "a": "{{1.properties_value.`AI Status`.name}}",
+              "b": "Queue Summary",
+              "o": "text:equal"
+            },
+            {
+              "a": "{{1.last_edited_by.name}}",
+              "b": "Automation Bot",
+              "o": "text:notequal"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "pageId": "{{1.id}}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 },
+        "notes": "Step 2-3: Filter out bot edits to prevent infinite loops, then pull page blocks."
+      }
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "mapper": {
+        "text": "{{2.plain_text}}"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 },
+        "notes": "Concatenate plain text blocks and enforce >150 words before calling LLM."
+      }
+    },
+    {
+      "id": 4,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "filter": {
+        "name": "Minimum Length Check (Save Credits)",
+        "conditions": [
+          [
+            {
+              "a": "{{length(3.text)}}",
+              "b": "600",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "response_format": "json_object",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Return strict JSON with keys: tldr_3_bullets (string), action_items (string), category_tag ('Normal' or 'Urgent')."
+          },
+          {
+            "role": "user",
+            "content": "{{3.text}}"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 },
+        "notes": "Step 4: BYO-Key LLM call (~$0.002/doc) — zero Notion Select credits burned."
+      }
+    },
+    {
+      "id": 5,
+      "module": "notion:updateDatabaseItem",
+      "version": 1,
+      "mapper": {
+        "databaseItemId": "{{1.id}}",
+        "Summary": "{{4.result.tldr_3_bullets}}",
+        "Action Items": "{{4.result.action_items}}",
+        "AI Status": "Done"
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 },
+        "notes": "Step 5: Write summary back to Notion and reset status to 'Done'."
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    },
+    "author": "Zero-Fluff Ops (zerofluffops.substack.com)"
+  }
+}

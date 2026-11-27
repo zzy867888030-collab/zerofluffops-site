@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /go/
+Sitemap: https://jolly-heart-7a83.zzy867888030.workers.dev/sitemap.xml

@@ -1,0 +1,57 @@
+{
+  "name": "Zero-Fluff Ops #001 — Zero-Panic AI Inbox & Lead Triage (Make + Notion)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-email:watchEmails",
+      "version": 1,
+      "mapper": { "folder": "INBOX", "criteria": "UNSEEN" },
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "filter": {
+        "name": "Drop No-Reply & Receipts (Save Credits)",
+        "conditions": [
+          [
+            { "a": "{{lower(1.from.address)}}", "b": "no-reply", "o": "text:notcontain" },
+            { "a": "{{lower(1.subject)}}", "b": "receipt", "o": "text:notcontain" }
+          ]
+        ]
+      },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "response_format": "json_object",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Classify inbound email into strict JSON: {category: 'Sales Lead'|'Support'|'Partnership'|'Ignore', urgency: 'High'|'Medium'|'Low', draft_reply: 'concise 3-sentence reply'}."
+          },
+          { "role": "user", "content": "Subject: {{1.subject}}\n\n{{1.text}}" }
+        ]
+      },
+      "metadata": { "designer": { "x": 320, "y": 0 } }
+    },
+    {
+      "id": 3,
+      "module": "notion:createDatabaseItem",
+      "version": 1,
+      "filter": {
+        "name": "Skip Ignored Emails",
+        "conditions": [[{ "a": "{{2.result.category}}", "b": "Ignore", "o": "text:notequal" }]]
+      },
+      "mapper": {
+        "databaseId": "YOUR_NOTION_TRIAGE_DB_ID",
+        "Subject": "{{1.subject}}",
+        "Category": "{{2.result.category}}",
+        "Urgency": "{{2.result.urgency}}",
+        "Draft Reply": "{{2.result.draft_reply}}",
+        "Status": "Needs Review"
+      },
+      "metadata": { "designer": { "x": 640, "y": 0 } }
+    }
+  ],
+  "metadata": { "version": 1, "author": "Zero-Fluff Ops (zerofluffops.substack.com)" }
+}

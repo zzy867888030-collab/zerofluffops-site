@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>n8n vs. Make + Notion: The 2026 No-Code AI Stack (Without Burning Credits) | Zero-Fluff Ops</title>
+  <meta name="description" content="Why &quot;agentic workflows&quot; broke per-step pricing—and a 15-minute Notion + AI triage recipe you can copy today." />
+  <link rel="canonical" href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-25-issue-001.html" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="../index.html">
+        <span>Zero-Fluff Ops</span>
+        <span class="brand-badge">2026 TOOLS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../blueprints/index.html">Templates (.JSON)</a>
+        <a href="../guides/index.html">Guides</a>
+        <a class="hide-mobile" href="../compare/make-vs-zapier.html">Comparisons</a>
+        <a class="btn-nav" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Free Newsletter →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container article-wrap">
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;"><a href="index.html">← All Workflow Blueprints &amp; Guides</a> · <span>2026-11-25</span></p>
+    <h1>n8n vs. Make + Notion: The 2026 No-Code AI Stack (Without Burning Credits)</h1>
+    <p style="color:#94a3b8;font-size:17px;">Why &quot;agentic workflows&quot; broke per-step pricing—and a 15-minute Notion + AI triage recipe you can copy today.</p>
+
+    <div class="blueprint-box">
+      <span class="pill" style="margin-bottom:10px;">READY-TO-IMPORT WORKFLOW TEMPLATES</span>
+      <h3>Download &amp; Run This Blueprint in 2 Minutes</h3>
+      <p>Grab the pre-configured JSON file below, then import it into Make.com (cloud visual canvas) or a 1-click self-hosted n8n server:</p>
+      <div class="cta-strip" style="margin:14px 0;">
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__MAKE_BP, '2026-11-25-issue-001-make-blueprint.json')">⬇ Download Make.com Blueprint (.json)</button>
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__N8N_BP, '2026-11-25-issue-001-n8n-workflow.json')">⬇ Download n8n Workflow (.json)</button>
+      </div>
+      <div class="cta-strip" style="margin:12px 0 0;">
+        <a class="cta-btn cta-make" href="../go/make.html?src=bp-2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Step 1A: Get Make Free (10k Ops Promo) →</a>
+        <a class="cta-btn cta-vps" href="../go/vps.html?src=bp-2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Step 1B: Deploy 1-Click n8n VPS (~$6/mo) →</a>
+      </div>
+    </div>
+    <script>
+    window.__MAKE_BP = "{\n  \"name\": \"Zero-Fluff Ops #001 \u2014 Zero-Panic AI Inbox & Lead Triage (Make + Notion)\",\n  \"flow\": [\n    {\n      \"id\": 1,\n      \"module\": \"google-email:watchEmails\",\n      \"version\": 1,\n      \"mapper\": { \"folder\": \"INBOX\", \"criteria\": \"UNSEEN\" },\n      \"metadata\": { \"designer\": { \"x\": 0, \"y\": 0 } }\n    },\n    {\n      \"id\": 2,\n      \"module\": \"openai-gpt-3:CreateCompletion\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Drop No-Reply & Receipts (Save Credits)\",\n        \"conditions\": [\n          [\n            { \"a\": \"{{lower(1.from.address)}}\", \"b\": \"no-reply\", \"o\": \"text:notcontain\" },\n            { \"a\": \"{{lower(1.subject)}}\", \"b\": \"receipt\", \"o\": \"text:notcontain\" }\n          ]\n        ]\n      },\n      \"mapper\": {\n        \"model\": \"gpt-4o-mini\",\n        \"response_format\": \"json_object\",\n        \"messages\": [\n          {\n            \"role\": \"system\",\n            \"content\": \"Classify inbound email into strict JSON: {category: 'Sales Lead'|'Support'|'Partnership'|'Ignore', urgency: 'High'|'Medium'|'Low', draft_reply: 'concise 3-sentence reply'}.\"\n          },\n          { \"role\": \"user\", \"content\": \"Subject: {{1.subject}}\\n\\n{{1.text}}\" }\n        ]\n      },\n      \"metadata\": { \"designer\": { \"x\": 320, \"y\": 0 } }\n    },\n    {\n      \"id\": 3,\n      \"module\": \"notion:createDatabaseItem\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Skip Ignored Emails\",\n        \"conditions\": [[{ \"a\": \"{{2.result.category}}\", \"b\": \"Ignore\", \"o\": \"text:notequal\" }]]\n      },\n      \"mapper\": {\n        \"databaseId\": \"YOUR_NOTION_TRIAGE_DB_ID\",\n        \"Subject\": \"{{1.subject}}\",\n        \"Category\": \"{{2.result.category}}\",\n        \"Urgency\": \"{{2.result.urgency}}\",\n        \"Draft Reply\": \"{{2.result.draft_reply}}\",\n        \"Status\": \"Needs Review\"\n      },\n      \"metadata\": { \"designer\": { \"x\": 640, \"y\": 0 } }\n    }\n  ],\n  \"metadata\": { \"version\": 1, \"author\": \"Zero-Fluff Ops (zerofluffops.substack.com)\" }\n}\n";
+    window.__N8N_BP = "{\n  \"name\": \"Zero-Fluff Ops #001 \u2014 Zero-Panic Inbox & Lead Triage (n8n)\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"pollTimes\": { \"item\": [{ \"mode\": \"everyMinute\" }] },\n        \"simple\": true\n      },\n      \"id\": \"gmail-trigger\",\n      \"name\": \"Gmail Trigger (New Inbound Email)\",\n      \"type\": \"n8n-nodes-base.gmailTrigger\",\n      \"typeVersion\": 1,\n      \"position\": [220, 300]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"string\": [\n            {\n              \"value1\": \"={{ $json.from }}\",\n              \"operation\": \"notContains\",\n              \"value2\": \"no-reply\"\n            },\n            {\n              \"value1\": \"={{ $json.from }}\",\n              \"operation\": \"notContains\",\n              \"value2\": \"noreply\"\n            },\n            {\n              \"value1\": \"={{ $json.subject }}\",\n              \"operation\": \"notContains\",\n              \"value2\": \"Receipt\"\n            }\n          ]\n        }\n      },\n      \"id\": \"noise-filter\",\n      \"name\": \"Filter: Drop Newsletters & No-Reply (Save Credits)\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"options\": { \"responseFormat\": \"json_object\" },\n        \"messages\": {\n          \"values\": [\n            {\n              \"role\": \"system\",\n              \"content\": \"Classify inbound email into strict JSON: {\\\"category\\\": \\\"Sales Lead|Support|Partnership|Ignore\\\", \\\"urgency\\\": \\\"High|Medium|Low\\\", \\\"draft_reply\\\": \\\"Concise 3-sentence reply\\\"}\"\n            },\n            {\n              \"role\": \"user\",\n              \"content\": \"=Subject: {{ $json.subject }}\\nFrom: {{ $json.from }}\\nBody: {{ $json.snippet }}\"\n            }\n          ]\n        }\n      },\n      \"id\": \"ai-classifier\",\n      \"name\": \"AI Classifier & Draft Reply\",\n      \"type\": \"@n8n/n8n-nodes-langchain.openAi\",\n      \"typeVersion\": 1,\n      \"position\": [700, 280]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"databasePage\",\n        \"operation\": \"create\",\n        \"databaseId\": \"YOUR_NOTION_INBOX_TRIAGE_DB_ID\",\n        \"title\": \"={{ $node['Gmail Trigger (New Inbound Email)'].json.subject }}\",\n        \"propertiesUi\": {\n          \"propertyValues\": [\n            { \"key\": \"Category|select\", \"selectValue\": \"={{ JSON.parse($json.message.content).category }}\" },\n            { \"key\": \"Urgency|select\", \"selectValue\": \"={{ JSON.parse($json.message.content).urgency }}\" },\n            { \"key\": \"Status|select\", \"selectValue\": \"Needs Review\" },\n            { \"key\": \"Draft Reply|rich_text\", \"textContent\": \"={{ JSON.parse($json.message.content).draft_reply }}\" }\n          ]\n        }\n      },\n      \"id\": \"notion-log\",\n      \"name\": \"Notion: Log to Inbox Triage Queue\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [940, 280]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"string\": [\n            {\n              \"value1\": \"={{ JSON.parse($node['AI Classifier & Draft Reply'].json.message.content).urgency }}\",\n              \"operation\": \"equals\",\n              \"value2\": \"High\"\n            }\n          ]\n        }\n      },\n      \"id\": \"urgency-check\",\n      \"name\": \"Filter: High Urgency Only\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [1180, 280]\n    },\n    {\n      \"parameters\": {\n        \"channel\": \"#urgent-leads\",\n        \"text\": \"=\ud83d\udd25 High-Urgency Inbound: {{ $node['Gmail Trigger (New Inbound Email)'].json.subject }} \u2014 Draft ready in Notion.\"\n      },\n      \"id\": \"slack-alert\",\n      \"name\": \"Slack: High-Urgency Ping\",\n      \"type\": \"n8n-nodes-base.slack\",\n      \"typeVersion\": 2,\n      \"position\": [1420, 260]\n    }\n  ],\n  \"connections\": {\n    \"Gmail Trigger (New Inbound Email)\": { \"main\": [[{ \"node\": \"Filter: Drop Newsletters & No-Reply (Save Credits)\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Filter: Drop Newsletters & No-Reply (Save Credits)\": { \"main\": [[{ \"node\": \"AI Classifier & Draft Reply\", \"type\": \"main\", \"index\": 0 }]] },\n    \"AI Classifier & Draft Reply\": { \"main\": [[{ \"node\": \"Notion: Log to Inbox Triage Queue\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Notion: Log to Inbox Triage Queue\": { \"main\": [[{ \"node\": \"Filter: High Urgency Only\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Filter: High Urgency Only\": { \"main\": [[{ \"node\": \"Slack: High-Urgency Ping\", \"type\": \"main\", \"index\": 0 }]] }\n  }\n}\n";
+    function downloadBp(content, filename) {
+      var blob = new Blob([content], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    </script>
+      <p>If you built automations two years ago, your mental model was simple: <strong>Trigger → Action → Done.</strong></p>
+      <p>In 2026, that model is mostly obsolete. The real leverage has shifted to <strong>hybrid agentic workflows</strong>—combining deterministic rules (routing, formatting, logging) with an LLM layer that reads messy inputs, makes decisions, and pulls context from your company docs.</p>
+      <p>The catch? Most people are picking the wrong orchestration tool for AI loops and quietly burning through hundreds of dollars in task credits.</p>
+      <p>Here is the honest breakdown of the three tools forming the core no-code AI stack right now, when each one makes sense, and one practical workflow you can deploy this afternoon.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>1. The Core Verdict: n8n vs. Make.com</h2>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/n8n.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">n8n</a> — Best for Heavy AI Agents &amp; Cost Control</h3>
+      <p>With its architectural upgrades (isolated Task Runners, much faster local database pooling, and native LangChain-style AI Agent nodes), n8n has become the default engine for anyone running multi-step AI workflows.</p>
+      <ul>
+        <li><strong>Why operators switch:</strong> You can wire up vector stores, conversation memory, and multi-model routing (e.g., use a cheap fast model for triage and a frontier model for final drafting) directly on one canvas.</li>
+        <li><strong>The killer edge:</strong> Flat execution pricing on Cloud—or <strong>free self-hosting</strong> on a cheap VPS. If your AI agent loops 15 times per run, you don&#x27;t get punished per step.</li>
+        <li><strong>The honest con:</strong> Steeper learning curve. If you&#x27;ve never looked at a JSON payload or webhook header, the first afternoon will feel technical.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/make.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Make.com</a> — Best for Speed &amp; Business Ops Guardrails</h3>
+      <p>Make remains the cleanest visual canvas on the market. With its <strong>Maia AI assistant</strong> and tighter structured-output / MCP guardrails, Make is leaning hard into <em>reliability</em>: letting AI classify and draft while keeping strict deterministic routing around it.</p>
+      <ul>
+        <li><strong>Why teams love it:</strong> You can build a clean, multi-branch CRM or client onboarding flow in 20 minutes without touching infrastructure.</li>
+        <li><strong>The honest con:</strong> Credit-based pricing adds up fast if you run high-volume loops or large polling intervals. Keep your loops tight and filter early.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/notion.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Notion</a> — Your Human-Friendly Control Plane</h3>
+      <p>Notion isn&#x27;t an automation engine, and that&#x27;s why it works so well here. Instead of forcing your team to stare at JSON logs, use a Notion database as:</p>
+      <ol>
+        <li><strong>The Knowledge Layer (RAG):</strong> Store your SOPs, brand voice, and FAQs so your n8n/Make AI agent can retrieve real context.</li>
+        <li><strong>The Approval Queue:</strong> Have your AI write drafts into Notion with status <code>Needs Review</code>. Only when a human flips the status to <code>Approved</code> does the second workflow publish or send the email.</li>
+      </ol>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>2. Quick Decision Matrix</h2>
+      <ul>
+        <li><strong>Complex multi-step AI agents, high volume, lowest cost</strong> → Pick <strong><a href="../go/n8n.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">n8n</a></strong></li>
+        <li><strong>Fast visual setup for business/marketing ops, zero DevOps</strong> → Pick <strong><a href="../go/make.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Make.com</a></strong></li>
+        <li><strong>Team-friendly database, SOP hub, and human-in-the-loop review</strong> → Pick <strong><a href="../go/notion.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Notion</a></strong></li>
+        <li><strong>Automatically protecting focus time around chaotic calendars</strong> → Pick <strong><a href="../go/reclaim.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Reclaim.ai</a></strong></li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>3. Copy-Paste Workflow of the Week: The &quot;Zero-Panic&quot; Inbox &amp; Lead Triage</h2>
+      <p>Stop letting client emails or inbound form submissions rot in your inbox. Build this in 15 minutes with <strong><a href="../go/make.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Make.com</a></strong> (or <strong><a href="../go/n8n.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">n8n</a></strong>) + <strong><a href="../go/notion.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Notion</a></strong>:</p>
+      <ol>
+        <li><strong>Trigger:</strong> Watch new inbound emails (Gmail/Outlook) or Typeform/Tally leads.</li>
+        <li><strong>Filter (Crucial for saving credits):</strong> Skip newsletters, <code>no-reply@</code> senders, and automated receipts <em>before</em> calling any LLM.</li>
+        <li><strong>AI Classifier Node:</strong> Pass the subject + body with a strict JSON schema asking for:</li>
+      </ol>
+      <ul>
+        <li><code>category</code>: <code>Sales Lead</code> | <code>Support</code> | <code>Partnership</code> | <code>Ignore</code></li>
+        <li><code>urgency</code>: <code>High</code> | <code>Medium</code> | <code>Low</code></li>
+        <li><code>draft_reply</code>: A concise 3-sentence reply using your Notion FAQ context.</li>
+      </ul>
+      <ol>
+        <li><strong>Action:</strong> Create a new row in your <strong><a href="../go/notion.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Notion</a></strong> &quot;Inbox Triage&quot; database with the draft reply ready to copy.</li>
+        <li><strong>Alert:</strong> Only send a Slack/Telegram ping if <code>urgency == High</code>.</li>
+      </ol>
+      <p><strong>Result:</strong> Instead of checking email 12 times a day, you review a clean Notion table once in the morning and once in the afternoon—with 80% of replies already drafted.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>One Tool Worth Watching This Week</h2>
+      <p>If your calendar is the real bottleneck (not your inbox), take a look at <strong><a href="../go/reclaim.html?src=2026-11-25-issue-001" target="_blank" rel="noopener sponsored">Reclaim.ai</a></strong>. It automatically defends deep-work blocks and reschedules flexible habits when urgent meetings land—no manual calendar Tetris required.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Hit reply and tell me: what&#x27;s the most repetitive 30-minute task on your plate this week? I&#x27;ll pick one reader&#x27;s workflow and build a step-by-step no-code blueprint in next week&#x27;s issue.</em></p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Disclosure: Some links in this issue are affiliate links, meaning I may earn a small commission at no extra cost to you if you choose to upgrade. I only feature tools I actually test and recommend for real workflows.</em></p>
+
+    <div class="newsletter-box" style="margin-top:36px;">
+      <h2>Get New Tested Blueprints Twice a Week</h2>
+      <p>Join <strong>Zero-Fluff Ops</strong> free on Substack for real cost math, honest tool verdicts, and copy-paste JSON workflows.</p>
+      <div class="cta-strip" style="justify-content:center;margin-bottom:0;">
+        <a class="btn-primary" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Subscribe Free on Substack →</a>
+        <a class="cta-btn cta-neutral" href="../index.html">Model Your Cost in Calculator →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div><strong>Zero-Fluff Ops</strong> — Practical no-code &amp; AI workflow blueprints and cost benchmarks. <a href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Read the Brief</a> · <a href="../index.html">Cost Calculator</a> · <a href="../blueprints/index.html">JSON Templates</a> · <a href="../guides/index.html">Guides</a></div>
+      <p class="disclosure">Disclosure: Pricing tiers are 2026 public-plan estimates for comparison purposes. Some outbound links (including /go/ partner links) are affiliate links, meaning we may earn a commission at no extra cost to you if you upgrade. We never run paid ads on brand keywords and only recommend tools we test in real workflows.</p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "42ffdf8149ba4edf8e775fddfcb73aed"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

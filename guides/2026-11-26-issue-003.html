@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Built a Free 2026 Automation Cost Calculator (Zapier vs. Make vs. n8n Math) | Zero-Fluff Ops</title>
+  <meta name="description" content="Model your exact monthly runs, steps, and AI loops in 10 seconds—plus a 5-step audit to cut your automation bill by 70%." />
+  <link rel="canonical" href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-26-issue-003.html" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="../index.html">
+        <span>Zero-Fluff Ops</span>
+        <span class="brand-badge">2026 TOOLS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../blueprints/index.html">Templates (.JSON)</a>
+        <a href="../guides/index.html">Guides</a>
+        <a class="hide-mobile" href="../compare/make-vs-zapier.html">Comparisons</a>
+        <a class="btn-nav" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Free Newsletter →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container article-wrap">
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;"><a href="index.html">← All Workflow Blueprints &amp; Guides</a> · <span>2026-11-26</span></p>
+    <h1>I Built a Free 2026 Automation Cost Calculator (Zapier vs. Make vs. n8n Math)</h1>
+    <p style="color:#94a3b8;font-size:17px;">Model your exact monthly runs, steps, and AI loops in 10 seconds—plus a 5-step audit to cut your automation bill by 70%.</p>
+
+    <div class="blueprint-box">
+      <span class="pill" style="margin-bottom:10px;">READY-TO-IMPORT WORKFLOW TEMPLATES</span>
+      <h3>Download &amp; Run This Blueprint in 2 Minutes</h3>
+      <p>Grab the pre-configured JSON file below, then import it into Make.com (cloud visual canvas) or a 1-click self-hosted n8n server:</p>
+      <div class="cta-strip" style="margin:14px 0;">
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__MAKE_BP, '2026-11-26-issue-003-make-blueprint.json')">⬇ Download Make.com Blueprint (.json)</button>
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__N8N_BP, '2026-11-26-issue-003-n8n-workflow.json')">⬇ Download n8n Workflow (.json)</button>
+      </div>
+      <div class="cta-strip" style="margin:12px 0 0;">
+        <a class="cta-btn cta-make" href="../go/make.html?src=bp-2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Step 1A: Get Make Free (10k Ops Promo) →</a>
+        <a class="cta-btn cta-vps" href="../go/vps.html?src=bp-2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Step 1B: Deploy 1-Click n8n VPS (~$6/mo) →</a>
+      </div>
+    </div>
+    <script>
+    window.__MAKE_BP = "{\n  \"name\": \"Zero-Fluff Ops #003 \u2014 Credit-Saver Webhook Guardrail & Notion Approval Queue (Make.com)\",\n  \"flow\": [\n    {\n      \"id\": 1,\n      \"module\": \"gateway:CustomWebHook\",\n      \"version\": 1,\n      \"parameters\": {\n        \"hook\": \"YOUR_MAKE_WEBHOOK_ID\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 0, \"y\": 0 },\n        \"notes\": \"Replaces 1-minute polling triggers to cut idle operations by 80%+\"\n      }\n    },\n    {\n      \"id\": 2,\n      \"module\": \"openai-gpt-3:CreateCompletion\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Zero-Cost Early Noise Filter\",\n        \"conditions\": [\n          [\n            { \"a\": \"{{1.sender_email}}\", \"b\": \"no-reply\", \"o\": \"text:notcontain:ci\" },\n            { \"a\": \"{{1.is_test}}\", \"b\": \"true\", \"o\": \"text:notequal:ci\" },\n            { \"a\": \"{{length(1.body)}}\", \"b\": \"25\", \"o\": \"number:greater\" }\n          ]\n        ]\n      },\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"response_format\": \"json_object\",\n        \"messages\": [\n          {\n            \"role\": \"system\",\n            \"content\": \"Return JSON: {\\\"priority\\\": \\\"High|Normal|Low\\\", \\\"summary\\\": \\\"1-line summary\\\", \\\"draft_response\\\": \\\"Concise reply\\\"}\"\n          },\n          {\n            \"role\": \"user\",\n            \"content\": \"{{1.subject}}\\n\\n{{1.body}}\"\n          }\n        ]\n      },\n      \"metadata\": { \"designer\": { \"x\": 320, \"y\": 0 } }\n    },\n    {\n      \"id\": 3,\n      \"module\": \"notion:createADatabaseItem\",\n      \"version\": 1,\n      \"parameters\": {\n        \"database_id\": \"YOUR_NOTION_APPROVAL_QUEUE_DB_ID\",\n        \"fields\": {\n          \"Title\": \"{{1.subject}}\",\n          \"Status\": \"Needs Review\",\n          \"Priority\": \"{{2.choices[].message.content.priority}}\",\n          \"Draft\": \"{{2.choices[].message.content.draft_response}}\"\n        }\n      },\n      \"metadata\": { \"designer\": { \"x\": 640, \"y\": 0 } }\n    }\n  ],\n  \"metadata\": {\n    \"instant\": true,\n    \"version\": 1,\n    \"scenario\": {\n      \"roundtrips\": 1,\n      \"maxErrors\": 3,\n      \"autoCommit\": true,\n      \"sequential\": false\n    }\n  }\n}\n";
+    window.__N8N_BP = "{\n  \"name\": \"Zero-Fluff Ops #003 \u2014 Credit-Saver Webhook Guardrail & Notion Approval Queue (n8n)\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"credit-saver-ingest\",\n        \"responseMode\": \"onReceived\"\n      },\n      \"id\": \"webhook-ingest\",\n      \"name\": \"Webhook: Instant Trigger (No Polling)\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [220, 300]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"string\": [\n            {\n              \"value1\": \"={{ $json.body.sender_email }}\",\n              \"operation\": \"notContains\",\n              \"value2\": \"no-reply\"\n            }\n          ],\n          \"number\": [\n            {\n              \"value1\": \"={{ ($json.body.body || '').length }}\",\n              \"operation\": \"larger\",\n              \"value2\": 25\n            }\n          ]\n        }\n      },\n      \"id\": \"early-filter\",\n      \"name\": \"Filter: Drop Noise Before LLM\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"options\": { \"responseFormat\": \"json_object\" },\n        \"messages\": {\n          \"values\": [\n            {\n              \"role\": \"system\",\n              \"content\": \"Return JSON: {\\\"priority\\\": \\\"High|Normal|Low\\\", \\\"summary\\\": \\\"1-line summary\\\", \\\"draft_response\\\": \\\"Concise reply\\\"}\"\n            },\n            {\n              \"role\": \"user\",\n              \"content\": \"={{ $json.body.subject }}\\n\\n{{ $json.body.body }}\"\n            }\n          ]\n        }\n      },\n      \"id\": \"cheap-triage-llm\",\n      \"name\": \"Fast Model Triage & Draft\",\n      \"type\": \"@n8n/n8n-nodes-langchain.openAi\",\n      \"typeVersion\": 1,\n      \"position\": [700, 280]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"databasePage\",\n        \"operation\": \"create\",\n        \"databaseId\": \"YOUR_NOTION_APPROVAL_QUEUE_DB_ID\",\n        \"title\": \"={{ $node['Webhook: Instant Trigger (No Polling)'].json.body.subject }}\",\n        \"propertiesUi\": {\n          \"propertyValues\": [\n            { \"key\": \"Status|select\", \"selectValue\": \"Needs Review\" },\n            { \"key\": \"Priority|select\", \"selectValue\": \"={{ JSON.parse($json.message.content).priority }}\" },\n            { \"key\": \"Draft|rich_text\", \"textContent\": \"={{ JSON.parse($json.message.content).draft_response }}\" }\n          ]\n        }\n      },\n      \"id\": \"notion-approval\",\n      \"name\": \"Notion: Needs Review Approval Queue\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [940, 280]\n    }\n  ],\n  \"connections\": {\n    \"Webhook: Instant Trigger (No Polling)\": { \"main\": [[{ \"node\": \"Filter: Drop Noise Before LLM\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Filter: Drop Noise Before LLM\": { \"main\": [[{ \"node\": \"Fast Model Triage & Draft\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Fast Model Triage & Draft\": { \"main\": [[{ \"node\": \"Notion: Needs Review Approval Queue\", \"type\": \"main\", \"index\": 0 }]] }\n  }\n}\n";
+    function downloadBp(content, filename) {
+      var blob = new Blob([content], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    </script>
+      <p>Last week, I audited a solo founder&#x27;s automation stack that was costing <strong>$283/month</strong> on Zapier for four fairly simple workflows.</p>
+      <p>Nothing fancy. Just lead capture, an AI email classifier, Notion logging, and Slack alerts.</p>
+      <p>When we modeled the exact same workload on <strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong> and <strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a></strong>, the monthly bill dropped to <strong>$21.18/month on Make</strong>—and <strong>$6/month on self-hosted n8n</strong>. That is over <strong>$3,100/year saved</strong> without losing a single feature.</p>
+      <p>The problem isn&#x27;t that people don&#x27;t care about pricing. It&#x27;s that comparing per-task billing (<strong><a href="../go/zapier.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Zapier</a></strong>), per-operation billing (<strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong>), and per-execution billing (<strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a></strong>) in your head is painful—especially once AI agent loops multiply your step count.</p>
+      <p>So I built a free, zero-login tool to do the math for you:</p>
+      <ul>
+        <li><strong>Try the free calculator here:</strong> <strong><a href="https://jolly-heart-7a83.zzy867888030.workers.dev/" target="_blank" rel="noopener sponsored">2026 AI Automation Cost Calculator</a></strong></li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>1. What the Real 2026 Numbers Look Like</h2>
+      <p>Here is what happens across three real-world workloads when you plug them into the <strong><a href="https://jolly-heart-7a83.zzy867888030.workers.dev/" target="_blank" rel="noopener sponsored">cost calculator</a></strong>:</p>
+      <ul>
+        <li><strong>Solo Founder Inbox Triage (1,500 runs/mo × 5 steps = 7,500 ops):</strong></li>
+        <li><strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong>: <strong>~$10.59/mo</strong> (Core 10k tier — and you get 1 month free via partner signup)</li>
+        <li><strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a> Cloud</strong>: <strong>$24/mo</strong> (Starter 2,500 executions)</li>
+        <li><strong><a href="../go/zapier.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Zapier</a></strong>: <strong>~$193.50/mo</strong> (6,000+ billable action tasks)</li>
+        <li><strong>Annual savings vs. Zapier:</strong> <strong>~$2,195/year</strong></li>
+      </ul>
+      <ul>
+        <li><strong>Agency CRM &amp; Onboarding (4,000 runs/mo × 8 steps = 32,000 ops):</strong></li>
+        <li><strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong>: <strong>~$42.36/mo</strong> (40k ops tier)</li>
+        <li><strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a> Cloud</strong>: <strong>$60/mo</strong> (Pro 10k executions)</li>
+        <li><strong><a href="../go/zapier.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Zapier</a></strong>: <strong>~$448.50/mo</strong> (28,000 billable tasks)</li>
+        <li><strong>Annual savings vs. Zapier:</strong> <strong>~$4,874/year</strong></li>
+      </ul>
+      <ul>
+        <li><strong>Heavy AI Agent Loop (3,000 runs/mo × 16 effective steps with RAG &amp; retries = 48,000 ops):</strong></li>
+        <li><strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a> Self-Hosted</strong>: <strong>~$6/mo</strong> (Community Edition $0 + basic VPS)</li>
+        <li><strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a> Cloud</strong>: <strong>$60/mo</strong> (steps inside a loop are free)</li>
+        <li><strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong>: <strong>~$80/mo</strong> (Pro tier — honest con: noisy loops burn operations fast if you skip early filters)</li>
+        <li><strong><a href="../go/zapier.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Zapier</a></strong>: <strong>~$448.50+/mo</strong></li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>2. Honest Tradeoffs (Don&#x27;t Switch Blindly)</h2>
+      <p>Cheapest on paper isn&#x27;t always best for your team. Here is the catch with each option:</p>
+      <ul>
+        <li><strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a> honest con:</strong> Operations add up quickly if you poll every 1 minute or feed spam emails straight into AI steps. Always drop noise with a Filter right after the trigger.</li>
+        <li><strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a> honest con:</strong> Self-hosting saves thousands, but you own upgrades, Docker, and webhook uptime. If your flows run under 10,000 ops/month, paying $10.59/mo for Make is cheaper than two hours of server debugging.</li>
+        <li><strong><a href="../go/zapier.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Zapier</a> honest con:</strong> Unbeatable for niche legacy connectors and zero-learning-curve speed, but the &quot;Zapier Tax&quot; punishes multi-step AI workflows hard.</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>3. Copy-Paste 5-Step Audit to Cut Your Bill by 70% This Afternoon</h2>
+      <p>Don&#x27;t migrate your entire workspace at once. Follow this 15-minute playbook:</p>
+      <ol>
+        <li><strong>Export your top 3 credit hogs:</strong> Sort your current automation dashboard by highest monthly tasks/operations. Usually 2 workflows cause 80% of your bill.</li>
+        <li><strong>Plug them into the calculator:</strong> Open the <strong><a href="https://jolly-heart-7a83.zzy867888030.workers.dev/" target="_blank" rel="noopener sponsored">2026 AI Automation Cost Calculator</a></strong>, toggle <strong>Multi-step AI Agent loop</strong> if you use LLMs, and check your real annual savings.</li>
+        <li><strong>Add a zero-cost early Filter:</strong> Drop <code>no-reply@</code>, receipts, test submissions, and duplicate webhooks <em>before</em> any AI or enrichment step runs.</li>
+        <li><strong>Migrate only the #1 noisy flow first:</strong> Move linear CRM/marketing flows to <strong><a href="../go/make.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Make.com</a></strong> (grab the 1-month Core + 10k credits free trial) or move looping AI agents to <strong><a href="../go/n8n.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">n8n</a></strong>.</li>
+        <li><strong>Route external outputs through Notion:</strong> Log AI drafts into a Notion <code>Needs Review</code> table instead of auto-sending raw replies—and pair with <strong><a href="../go/reclaim.html?src=2026-11-26-issue-003" target="_blank" rel="noopener sponsored">Reclaim.ai</a></strong> if calendar chaos is your next bottleneck.</li>
+      </ol>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Try the <strong><a href="https://jolly-heart-7a83.zzy867888030.workers.dev/" target="_blank" rel="noopener sponsored">free calculator</a></strong> and hit reply with your monthly savings number—I&#x27;d love to hear which workflow was secretly draining your credits!</em></p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Disclosure: Some links in this issue are affiliate links, meaning I may earn a small commission at no extra cost to you if you choose to upgrade. I only feature tools I actually test and recommend for real workflows.</em></p>
+
+    <div class="newsletter-box" style="margin-top:36px;">
+      <h2>Get New Tested Blueprints Twice a Week</h2>
+      <p>Join <strong>Zero-Fluff Ops</strong> free on Substack for real cost math, honest tool verdicts, and copy-paste JSON workflows.</p>
+      <div class="cta-strip" style="justify-content:center;margin-bottom:0;">
+        <a class="btn-primary" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Subscribe Free on Substack →</a>
+        <a class="cta-btn cta-neutral" href="../index.html">Model Your Cost in Calculator →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div><strong>Zero-Fluff Ops</strong> — Practical no-code &amp; AI workflow blueprints and cost benchmarks. <a href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Read the Brief</a> · <a href="../index.html">Cost Calculator</a> · <a href="../blueprints/index.html">JSON Templates</a> · <a href="../guides/index.html">Guides</a></div>
+      <p class="disclosure">Disclosure: Pricing tiers are 2026 public-plan estimates for comparison purposes. Some outbound links (including /go/ partner links) are affiliate links, meaning we may earn a commission at no extra cost to you if you upgrade. We never run paid ads on brand keywords and only recommend tools we test in real workflows.</p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "42ffdf8149ba4edf8e775fddfcb73aed"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

@@ -1,0 +1,72 @@
+{
+  "name": "Zero-Fluff Ops #003 — Credit-Saver Webhook Guardrail & Notion Approval Queue (Make.com)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": "YOUR_MAKE_WEBHOOK_ID"
+      },
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "notes": "Replaces 1-minute polling triggers to cut idle operations by 80%+"
+      }
+    },
+    {
+      "id": 2,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "filter": {
+        "name": "Zero-Cost Early Noise Filter",
+        "conditions": [
+          [
+            { "a": "{{1.sender_email}}", "b": "no-reply", "o": "text:notcontain:ci" },
+            { "a": "{{1.is_test}}", "b": "true", "o": "text:notequal:ci" },
+            { "a": "{{length(1.body)}}", "b": "25", "o": "number:greater" }
+          ]
+        ]
+      },
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "response_format": "json_object",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Return JSON: {\"priority\": \"High|Normal|Low\", \"summary\": \"1-line summary\", \"draft_response\": \"Concise reply\"}"
+          },
+          {
+            "role": "user",
+            "content": "{{1.subject}}\n\n{{1.body}}"
+          }
+        ]
+      },
+      "metadata": { "designer": { "x": 320, "y": 0 } }
+    },
+    {
+      "id": 3,
+      "module": "notion:createADatabaseItem",
+      "version": 1,
+      "parameters": {
+        "database_id": "YOUR_NOTION_APPROVAL_QUEUE_DB_ID",
+        "fields": {
+          "Title": "{{1.subject}}",
+          "Status": "Needs Review",
+          "Priority": "{{2.choices[].message.content.priority}}",
+          "Draft": "{{2.choices[].message.content.draft_response}}"
+        }
+      },
+      "metadata": { "designer": { "x": 640, "y": 0 } }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "sequential": false
+    }
+  }
+}

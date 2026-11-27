@@ -1,0 +1,90 @@
+{
+  "name": "Zero-Fluff Ops #003 — Credit-Saver Webhook Guardrail & Notion Approval Queue (n8n)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "credit-saver-ingest",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-ingest",
+      "name": "Webhook: Instant Trigger (No Polling)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.sender_email }}",
+              "operation": "notContains",
+              "value2": "no-reply"
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{ ($json.body.body || '').length }}",
+              "operation": "larger",
+              "value2": 25
+            }
+          ]
+        }
+      },
+      "id": "early-filter",
+      "name": "Filter: Drop Noise Before LLM",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": { "responseFormat": "json_object" },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Return JSON: {\"priority\": \"High|Normal|Low\", \"summary\": \"1-line summary\", \"draft_response\": \"Concise reply\"}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.body.subject }}\n\n{{ $json.body.body }}"
+            }
+          ]
+        }
+      },
+      "id": "cheap-triage-llm",
+      "name": "Fast Model Triage & Draft",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [700, 280]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "YOUR_NOTION_APPROVAL_QUEUE_DB_ID",
+        "title": "={{ $node['Webhook: Instant Trigger (No Polling)'].json.body.subject }}",
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Status|select", "selectValue": "Needs Review" },
+            { "key": "Priority|select", "selectValue": "={{ JSON.parse($json.message.content).priority }}" },
+            { "key": "Draft|rich_text", "textContent": "={{ JSON.parse($json.message.content).draft_response }}" }
+          ]
+        }
+      },
+      "id": "notion-approval",
+      "name": "Notion: Needs Review Approval Queue",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [940, 280]
+    }
+  ],
+  "connections": {
+    "Webhook: Instant Trigger (No Polling)": { "main": [[{ "node": "Filter: Drop Noise Before LLM", "type": "main", "index": 0 }]] },
+    "Filter: Drop Noise Before LLM": { "main": [[{ "node": "Fast Model Triage & Draft", "type": "main", "index": 0 }]] },
+    "Fast Model Triage & Draft": { "main": [[{ "node": "Notion: Needs Review Approval Queue", "type": "main", "index": 0 }]] }
+  }
+}

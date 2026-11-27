@@ -1,0 +1,92 @@
+{
+  "name": "Zero-Fluff Ops #002 — AI Meeting Notes to Notion & CRM Logger (n8n)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meeting-notes-webhook",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Fathom / Granola Meeting Summary",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.attendee_emails }}",
+              "operation": "notContains",
+              "value2": "@yourcompany.com"
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{ $json.body.duration_minutes }}",
+              "operation": "largerEqual",
+              "value2": 5
+            }
+          ]
+        }
+      },
+      "id": "internal-filter",
+      "name": "Filter: External Client Calls >= 5 Min",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "YOUR_NOTION_MEETING_HUB_DB_ID",
+        "title": "={{ $json.body.meeting_title }} ({{ $json.body.meeting_date }})",
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Summary|rich_text", "textContent": "={{ $json.body.ai_summary }}" },
+            { "key": "Action Items|rich_text", "textContent": "={{ $json.body.action_items }}" },
+            { "key": "Recording URL|url", "urlValue": "={{ $json.body.recording_url }}" }
+          ]
+        }
+      },
+      "id": "notion-meeting",
+      "name": "Notion: Log Client Meeting Page",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [740, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/notes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer YOUR_CRM_API_TOKEN" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"properties\": {\"hs_note_body\": \"AI Meeting Summary: {{ $json.body.ai_summary }}\\nAction Items: {{ $json.body.action_items }}\\nRecording: {{ $json.body.recording_url }}\"}}"
+      },
+      "id": "crm-note",
+      "name": "CRM: Attach Meeting Note (HubSpot / Attio)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [740, 420]
+    }
+  ],
+  "connections": {
+    "Webhook: Fathom / Granola Meeting Summary": { "main": [[{ "node": "Filter: External Client Calls >= 5 Min", "type": "main", "index": 0 }]] },
+    "Filter: External Client Calls >= 5 Min": {
+      "main": [[
+        { "node": "Notion: Log Client Meeting Page", "type": "main", "index": 0 },
+        { "node": "CRM: Attach Meeting Note (HubSpot / Attio)", "type": "main", "index": 0 }
+      ]]
+    }
+  }
+}

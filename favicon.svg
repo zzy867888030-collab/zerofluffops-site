@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E1B4B"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="55%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded Dark Badge -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)" stroke="url(#bolt)" stroke-width="3.5"/>
+  <!-- Stylized Automation Flow 'Z' / Lightning Bolt -->
+  <path d="M19 18 H46 L27 46 H45" fill="none" stroke="url(#bolt)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Workflow Node Dots -->
+  <circle cx="19" cy="18" r="4.5" fill="#4ADE80"/>
+  <circle cx="45" cy="46" r="4.5" fill="#38BDF8"/>
+</svg>

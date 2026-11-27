@@ -1,0 +1,124 @@
+{
+  "name": "Zero-Fluff Ops #001 — Zero-Panic Inbox & Lead Triage (n8n)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "simple": true
+      },
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger (New Inbound Email)",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.from }}",
+              "operation": "notContains",
+              "value2": "no-reply"
+            },
+            {
+              "value1": "={{ $json.from }}",
+              "operation": "notContains",
+              "value2": "noreply"
+            },
+            {
+              "value1": "={{ $json.subject }}",
+              "operation": "notContains",
+              "value2": "Receipt"
+            }
+          ]
+        }
+      },
+      "id": "noise-filter",
+      "name": "Filter: Drop Newsletters & No-Reply (Save Credits)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": { "responseFormat": "json_object" },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Classify inbound email into strict JSON: {\"category\": \"Sales Lead|Support|Partnership|Ignore\", \"urgency\": \"High|Medium|Low\", \"draft_reply\": \"Concise 3-sentence reply\"}"
+            },
+            {
+              "role": "user",
+              "content": "=Subject: {{ $json.subject }}\nFrom: {{ $json.from }}\nBody: {{ $json.snippet }}"
+            }
+          ]
+        }
+      },
+      "id": "ai-classifier",
+      "name": "AI Classifier & Draft Reply",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [700, 280]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "YOUR_NOTION_INBOX_TRIAGE_DB_ID",
+        "title": "={{ $node['Gmail Trigger (New Inbound Email)'].json.subject }}",
+        "propertiesUi": {
+          "propertyValues": [
+            { "key": "Category|select", "selectValue": "={{ JSON.parse($json.message.content).category }}" },
+            { "key": "Urgency|select", "selectValue": "={{ JSON.parse($json.message.content).urgency }}" },
+            { "key": "Status|select", "selectValue": "Needs Review" },
+            { "key": "Draft Reply|rich_text", "textContent": "={{ JSON.parse($json.message.content).draft_reply }}" }
+          ]
+        }
+      },
+      "id": "notion-log",
+      "name": "Notion: Log to Inbox Triage Queue",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [940, 280]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ JSON.parse($node['AI Classifier & Draft Reply'].json.message.content).urgency }}",
+              "operation": "equals",
+              "value2": "High"
+            }
+          ]
+        }
+      },
+      "id": "urgency-check",
+      "name": "Filter: High Urgency Only",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1180, 280]
+    },
+    {
+      "parameters": {
+        "channel": "#urgent-leads",
+        "text": "=🔥 High-Urgency Inbound: {{ $node['Gmail Trigger (New Inbound Email)'].json.subject }} — Draft ready in Notion."
+      },
+      "id": "slack-alert",
+      "name": "Slack: High-Urgency Ping",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1420, 260]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger (New Inbound Email)": { "main": [[{ "node": "Filter: Drop Newsletters & No-Reply (Save Credits)", "type": "main", "index": 0 }]] },
+    "Filter: Drop Newsletters & No-Reply (Save Credits)": { "main": [[{ "node": "AI Classifier & Draft Reply", "type": "main", "index": 0 }]] },
+    "AI Classifier & Draft Reply": { "main": [[{ "node": "Notion: Log to Inbox Triage Queue", "type": "main", "index": 0 }]] },
+    "Notion: Log to Inbox Triage Queue": { "main": [[{ "node": "Filter: High Urgency Only", "type": "main", "index": 0 }]] },
+    "Filter: High Urgency Only": { "main": [[{ "node": "Slack: High-Urgency Ping", "type": "main", "index": 0 }]] }
+  }
+}

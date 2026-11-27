@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notion&#x27;s AI Credit Cap vs. Superhuman Docs &amp; ClickUp (2026 Team Cost Verdict) | Zero-Fluff Ops</title>
+  <meta name="description" content="Notion now caps Business workspaces at 1,500 Standard + 500 Select AI credits/mo. Here is the 5-seat math vs. Superhuman Docs, ClickUp, and a BYO-key Make recipe." />
+  <link rel="canonical" href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-27-issue-004.html" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="../index.html">
+        <span>Zero-Fluff Ops</span>
+        <span class="brand-badge">2026 TOOLS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../blueprints/index.html">Templates (.JSON)</a>
+        <a href="../guides/index.html">Guides</a>
+        <a class="hide-mobile" href="../compare/make-vs-zapier.html">Comparisons</a>
+        <a class="btn-nav" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Free Newsletter →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container article-wrap">
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;"><a href="index.html">← All Workflow Blueprints &amp; Guides</a> · <span>2026-11-27</span></p>
+    <h1>Notion&#x27;s AI Credit Cap vs. Superhuman Docs &amp; ClickUp (2026 Team Cost Verdict)</h1>
+    <p style="color:#94a3b8;font-size:17px;">Notion now caps Business workspaces at 1,500 Standard + 500 Select AI credits/mo. Here is the 5-seat math vs. Superhuman Docs, ClickUp, and a BYO-key Make recipe.</p>
+
+    <div class="blueprint-box">
+      <span class="pill" style="margin-bottom:10px;">READY-TO-IMPORT WORKFLOW TEMPLATES</span>
+      <h3>Download &amp; Run This Blueprint in 2 Minutes</h3>
+      <p>Grab the pre-configured JSON file below, then import it into Make.com (cloud visual canvas) or a 1-click self-hosted n8n server:</p>
+      <div class="cta-strip" style="margin:14px 0;">
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__MAKE_BP, '2026-11-27-issue-004-make-blueprint.json')">⬇ Download Make.com Blueprint (.json)</button>
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__N8N_BP, '2026-11-27-issue-004-n8n-workflow.json')">⬇ Download n8n Workflow (.json)</button>
+      </div>
+      <div class="cta-strip" style="margin:12px 0 0;">
+        <a class="cta-btn cta-make" href="../go/make.html?src=bp-2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Step 1A: Get Make Free (10k Ops Promo) →</a>
+        <a class="cta-btn cta-vps" href="../go/vps.html?src=bp-2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Step 1B: Deploy 1-Click n8n VPS (~$6/mo) →</a>
+      </div>
+    </div>
+    <script>
+    window.__MAKE_BP = "{\n  \"name\": \"Zero-Fluff Ops #004 \u2014 Credit-Free Notion Doc & SOP AI Summarizer (BYO API Key)\",\n  \"flow\": [\n    {\n      \"id\": 1,\n      \"module\": \"notion:watchDatabaseItems\",\n      \"version\": 1,\n      \"parameters\": {},\n      \"mapper\": {\n        \"databaseId\": \"YOUR_NOTION_DATABASE_ID\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 0, \"y\": 0 },\n        \"notes\": \"Step 1: Trigger when a Notion page's AI Status is set to 'Queue Summary'.\"\n      }\n    },\n    {\n      \"id\": 2,\n      \"module\": \"notion:listPageContents\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Loop & Status Guardrail\",\n        \"conditions\": [\n          [\n            {\n              \"a\": \"{{1.properties_value.`AI Status`.name}}\",\n              \"b\": \"Queue Summary\",\n              \"o\": \"text:equal\"\n            },\n            {\n              \"a\": \"{{1.last_edited_by.name}}\",\n              \"b\": \"Automation Bot\",\n              \"o\": \"text:notequal\"\n            }\n          ]\n        ]\n      },\n      \"mapper\": {\n        \"pageId\": \"{{1.id}}\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 300, \"y\": 0 },\n        \"notes\": \"Step 2-3: Filter out bot edits to prevent infinite loops, then pull page blocks.\"\n      }\n    },\n    {\n      \"id\": 3,\n      \"module\": \"builtin:BasicAggregator\",\n      \"version\": 1,\n      \"mapper\": {\n        \"text\": \"{{2.plain_text}}\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 600, \"y\": 0 },\n        \"notes\": \"Concatenate plain text blocks and enforce >150 words before calling LLM.\"\n      }\n    },\n    {\n      \"id\": 4,\n      \"module\": \"openai-gpt-3:CreateCompletion\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Minimum Length Check (Save Credits)\",\n        \"conditions\": [\n          [\n            {\n              \"a\": \"{{length(3.text)}}\",\n              \"b\": \"600\",\n              \"o\": \"number:greater\"\n            }\n          ]\n        ]\n      },\n      \"mapper\": {\n        \"model\": \"gpt-4o-mini\",\n        \"response_format\": \"json_object\",\n        \"messages\": [\n          {\n            \"role\": \"system\",\n            \"content\": \"Return strict JSON with keys: tldr_3_bullets (string), action_items (string), category_tag ('Normal' or 'Urgent').\"\n          },\n          {\n            \"role\": \"user\",\n            \"content\": \"{{3.text}}\"\n          }\n        ]\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 900, \"y\": 0 },\n        \"notes\": \"Step 4: BYO-Key LLM call (~$0.002/doc) \u2014 zero Notion Select credits burned.\"\n      }\n    },\n    {\n      \"id\": 5,\n      \"module\": \"notion:updateDatabaseItem\",\n      \"version\": 1,\n      \"mapper\": {\n        \"databaseItemId\": \"{{1.id}}\",\n        \"Summary\": \"{{4.result.tldr_3_bullets}}\",\n        \"Action Items\": \"{{4.result.action_items}}\",\n        \"AI Status\": \"Done\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 1200, \"y\": 0 },\n        \"notes\": \"Step 5: Write summary back to Notion and reset status to 'Done'.\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"instant\": false,\n    \"version\": 1,\n    \"scenario\": {\n      \"roundtrips\": 1,\n      \"maxErrors\": 3,\n      \"autoCommit\": true\n    },\n    \"author\": \"Zero-Fluff Ops (zerofluffops.substack.com)\"\n  }\n}\n";
+    window.__N8N_BP = "{\n  \"name\": \"Zero-Fluff Ops #004 \u2014 Credit-Free Notion Doc Summarizer (n8n Self-Hosted / Cloud)\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"pollTimes\": { \"item\": [{ \"mode\": \"everyMinute\" }] },\n        \"databaseId\": \"YOUR_NOTION_DATABASE_ID\"\n      },\n      \"id\": \"notion-trigger\",\n      \"name\": \"Notion Trigger (Watch Database)\",\n      \"type\": \"n8n-nodes-base.notionTrigger\",\n      \"typeVersion\": 1,\n      \"position\": [220, 300]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"string\": [\n            {\n              \"value1\": \"={{ $json.properties['AI Status'].select.name }}\",\n              \"operation\": \"equals\",\n              \"value2\": \"Queue Summary\"\n            },\n            {\n              \"value1\": \"={{ $json.last_edited_by.name }}\",\n              \"operation\": \"notEqual\",\n              \"value2\": \"Automation Bot\"\n            }\n          ]\n        }\n      },\n      \"id\": \"loop-guardrail\",\n      \"name\": \"Filter: Loop & Status Guardrail\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"block\",\n        \"operation\": \"getAll\",\n        \"blockId\": \"={{ $json.id }}\",\n        \"returnAll\": true\n      },\n      \"id\": \"fetch-blocks\",\n      \"name\": \"Fetch Notion Page Blocks\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [700, 280]\n    },\n    {\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"options\": { \"responseFormat\": \"json_object\" },\n        \"messages\": {\n          \"values\": [\n            {\n              \"role\": \"system\",\n              \"content\": \"Summarize into strict JSON: {\\\"tldr_3_bullets\\\": \\\"...\\\", \\\"action_items\\\": \\\"...\\\", \\\"category_tag\\\": \\\"Normal|Urgent\\\"}\"\n            },\n            {\n              \"role\": \"user\",\n              \"content\": \"={{ $items().map(i => i.json.content || '').join('\\\\n') }}\"\n            }\n          ]\n        }\n      },\n      \"id\": \"byo-llm\",\n      \"name\": \"BYO-Key LLM Summarizer\",\n      \"type\": \"@n8n/n8n-nodes-langchain.openAi\",\n      \"typeVersion\": 1,\n      \"position\": [940, 280]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"databasePage\",\n        \"operation\": \"update\",\n        \"pageId\": \"={{ $node['Notion Trigger (Watch Database)'].json.id }}\",\n        \"propertiesUi\": {\n          \"propertyValues\": [\n            { \"key\": \"AI Status|select\", \"selectValue\": \"Done\" },\n            { \"key\": \"Summary|rich_text\", \"textContent\": \"={{ $json.tldr_3_bullets }}\" }\n          ]\n        }\n      },\n      \"id\": \"write-back\",\n      \"name\": \"Update Notion & Flip Status Done\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [1180, 280]\n    }\n  ],\n  \"connections\": {\n    \"Notion Trigger (Watch Database)\": {\n      \"main\": [[{ \"node\": \"Filter: Loop & Status Guardrail\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Filter: Loop & Status Guardrail\": {\n      \"main\": [[{ \"node\": \"Fetch Notion Page Blocks\", \"type\": \"main\", \"index\": 0 }], []]\n    },\n    \"Fetch Notion Page Blocks\": {\n      \"main\": [[{ \"node\": \"BYO-Key LLM Summarizer\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"BYO-Key LLM Summarizer\": {\n      \"main\": [[{ \"node\": \"Update Notion & Flip Status Done\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n";
+    function downloadBp(content, filename) {
+      var blob = new Blob([content], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    </script>
+      <p>If you upgraded your team to Notion Business this month expecting &quot;unlimited&quot; workspace AI, check your billing page closely.</p>
+      <p>Effective November 2026, <strong><a href="../go/notion.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Notion</a></strong> officially moved Business ($20/member/month billed annually, or $24 monthly) and Enterprise workspaces onto a strict two-bucket monthly AI credit allowance: <strong>1,500 Standard credits</strong> (when AI is set to Auto) and <strong>500 Select credits</strong> (when you pick a specific model or run Custom Agents).</p>
+      <p>The catch? Unused credits do not roll over, and AI Meeting Notes alone burn roughly <strong>10 Standard credits per 1-hour call</strong>. For a 5-person ops team, paying $100/month just to hit mid-month Select-credit walls—especially right after Notion&#x27;s upstream Fireworks AI vendor disclosure reminded teams to watch where prompts are routed—is a bad trade.</p>
+      <p>Here is the honest 2026 cost verdict across Notion, Superhuman Docs (formerly Coda), and ClickUp, plus a 15-minute BYO-key automation you can build today to bypass workspace AI caps altogether.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>1. The 2026 Workspace AI Verdict (5-Seat Math)</h2>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/notion.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Notion</a> — Best Knowledge Hub, Expensive as Your Only AI Engine</h3>
+      <p>Notion&#x27;s Plus plan ($10/member/month annual) still gives you the full database and wiki engine, with only a limited AI trial. Stepping up to Business ($20/member/month annual) bundles the Notion Agent, AI Meeting Notes, and Enterprise Search—plus <em>Notion 3.8</em> lets Business teams link external ChatGPT Plus or Pro accounts to the Notion Agent.</p>
+      <ul>
+        <li><strong>The 5-seat cost:</strong> <strong>$100/month ($1,200/year)</strong> on Business vs. <strong>$50/month ($600/year)</strong> on Plus.</li>
+        <li><strong>Why teams stay:</strong> Unmatched relational databases, clean client portals, and the easiest human-in-the-loop review queue for automated drafts.</li>
+        <li><strong>The honest con:</strong> Bundling AI per seat forces you to pay $20/month even for teammates who barely run agents, while heavy builders burn through their 500 non-rollover Select credits in a week.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;">Superhuman Docs (Formerly Coda) — Best for Maker-Light Teams</h3>
+      <p>Coda officially rebranded to <strong>Superhuman Docs</strong>, and its &quot;Doc Maker&quot; pricing model remains the cleanest antidote to per-viewer seat bloat. Editors and viewers are <strong>free</strong>.</p>
+      <ul>
+        <li><strong>The 5-seat cost:</strong> On Pro (<strong>$12/Doc Maker/month</strong> annual), a 5-person team with 2 Doc Makers and 3 editors pays just <strong>$24/month ($288/year)</strong>—saving <strong>$912/year</strong> versus Notion Business.</li>
+        <li><strong>Why teams switch:</strong> Native doc-level buttons, formulas, and Packs turn a single document into a lightweight internal app without extra SaaS seats.</li>
+        <li><strong>The honest con:</strong> If all 5 teammates create new docs and schemas daily, Maker seats add up fast—and unlocking unlimited automations and private folders requires Business at <strong>$33/Doc Maker/month</strong> annual ($40 monthly).</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/clickup.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">ClickUp</a> — Best All-in-One Ops Value Under $10/Seat</h3>
+      <p><strong><a href="../go/clickup.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">ClickUp</a></strong> recently simplified its lineup into <strong>Core ($9/user/month annual)</strong>, <strong>Business ($17/user/month)</strong>, and <strong>MAX ($100/user/month)</strong>. Core includes <strong>1,000 automation actions/month</strong> and <strong>1,000 AI credits/seat</strong> out of the box.</p>
+      <ul>
+        <li><strong>The 5-seat cost:</strong> <strong>$45/month ($540/year)</strong> on Core, or <strong>$85/month</strong> on Business.</li>
+        <li><strong>Why ops teams pick it:</strong> Tight task hierarchies, native ClickUp Brain summaries, and solid sprint/workload tracking in one tab.</li>
+        <li><strong>The honest con:</strong> Advanced Workload views and unlimited Dashboard reporting remain gated above Core, and native workspace automations hit a wall quickly on complex external webhooks.</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>2. The Zero-Fluff Stack Alternative (Save ~$396/Year)</h2>
+      <p>Instead of paying $20–$33/seat for bundled workspace AI credits, keep your workspace lean and route heavy AI processing through an external orchestrator with your <strong>own API key</strong>:</p>
+      <ul>
+        <li><strong>Lean Workspace + Visual AI Ops (5 seats):</strong> <strong><a href="../go/notion.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Notion</a></strong> Plus ($50/mo) + <strong><a href="../go/make.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Make.com</a></strong> Core ($10.59–$12/mo annual for 10,000 operations) + raw OpenAI/Anthropic/Gemini API usage (~$5/mo) = <strong>~$67/month</strong> (<strong>~$396/year saved</strong> vs. Notion Business, with zero Select-credit ceilings).</li>
+        <li><strong>Heavy Code or Privacy-First Agents:</strong> Pair <strong><a href="../go/clickup.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">ClickUp</a></strong> Core ($9/seat) or Notion Plus with self-hosted <strong><a href="../go/n8n.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">n8n</a></strong> ($0 Community Edition on a ~$6/mo VPS, or $20/mo Cloud Starter annual for 2,500 executions).</li>
+        <li><strong>Calendar Bottleneck Fix:</strong> Use <strong><a href="../go/reclaim.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Reclaim.ai</a></strong> (free Lite plan, or $10/seat Starter annual) to auto-schedule focus blocks directly from ClickUp or Google Tasks instead of burning AI credits on manual scheduling prompts.</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>3. Copy-Paste Recipe: The 15-Minute &quot;Credit-Free&quot; Doc &amp; SOP Summarizer</h2>
+      <p>Stop burning 500-credit workspace caps on routine summaries. Build this 5-step flow in <strong><a href="../go/make.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Make.com</a></strong> + <strong><a href="../go/notion.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Notion</a></strong> (or <strong><a href="../go/clickup.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">ClickUp</a></strong>) using your own API key (~$0.002 per run):</p>
+      <ol>
+        <li><strong>Trigger (Watch Database Items):</strong> Fire whenever a <strong><a href="../go/notion.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Notion</a></strong> page (or ClickUp task) has its <code>AI Status</code> property flipped to <code>Queue Summary</code>.</li>
+        <li><strong>Filter (Loop &amp; Waste Guardrail):</strong> Abort immediately if page text is under 150 words or <code>Last Edited By == Automation Bot</code> so you never trigger infinite update loops.</li>
+        <li><strong>Fetch Page Content:</strong> Pull the page body blocks and concatenate plain text, stripping empty dividers and image captions.</li>
+        <li><strong>BYO-Key LLM Module (OpenAI / Anthropic / Gemini in <a href="../go/make.html?src=2026-11-27-issue-004" target="_blank" rel="noopener sponsored">Make.com</a>):</strong> Request strict JSON output containing <code>tldr_3_bullets</code>, <code>action_items</code> (owner + due date), and <code>category_tag</code>.</li>
+        <li><strong>Write Back &amp; Reset Status:</strong> Update the Notion <code>Summary</code> property, append the action items, set <code>AI Status</code> to <code>Done</code>, and send a Slack alert only if <code>category_tag == Urgent</code>.</li>
+      </ol>
+      <p><strong>Result:</strong> You save <strong>20–30 minutes a day</strong> of manual doc cleanup, bypass monthly workspace Select-credit limits completely, and keep full control over which LLM vendor handles your company data.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>How many seats are on your team&#x27;s Notion or ClickUp plan right now? Hit reply with your seat count and main AI use case—I&#x27;ll reply with the cheapest stack breakdown for your setup.</em></p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Disclosure: Some links in this issue are affiliate links, meaning I may earn a small commission at no extra cost to you if you choose to upgrade. I only feature tools I actually test and recommend for real workflows.</em></p>
+
+    <div class="newsletter-box" style="margin-top:36px;">
+      <h2>Get New Tested Blueprints Twice a Week</h2>
+      <p>Join <strong>Zero-Fluff Ops</strong> free on Substack for real cost math, honest tool verdicts, and copy-paste JSON workflows.</p>
+      <div class="cta-strip" style="justify-content:center;margin-bottom:0;">
+        <a class="btn-primary" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Subscribe Free on Substack →</a>
+        <a class="cta-btn cta-neutral" href="../index.html">Model Your Cost in Calculator →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div><strong>Zero-Fluff Ops</strong> — Practical no-code &amp; AI workflow blueprints and cost benchmarks. <a href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Read the Brief</a> · <a href="../index.html">Cost Calculator</a> · <a href="../blueprints/index.html">JSON Templates</a> · <a href="../guides/index.html">Guides</a></div>
+      <p class="disclosure">Disclosure: Pricing tiers are 2026 public-plan estimates for comparison purposes. Some outbound links (including /go/ partner links) are affiliate links, meaning we may earn a commission at no extra cost to you if you upgrade. We never run paid ads on brand keywords and only recommend tools we test in real workflows.</p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "42ffdf8149ba4edf8e775fddfcb73aed"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
