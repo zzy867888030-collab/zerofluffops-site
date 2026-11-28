@@ -1,0 +1,104 @@
+{
+  "name": "Zero-Fluff Ops #005 — OpenAI Agent Builder Replacement & ChatKit Backend (n8n)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-router",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "ChatKit / App Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ ($json.body.message || '').length }}",
+              "operation": "larger",
+              "value2": 12
+            }
+          ],
+          "string": [
+            {
+              "value1": "={{ $json.body.sender_type }}",
+              "operation": "notEqual",
+              "value2": "bot"
+            }
+          ]
+        }
+      },
+      "id": "guardrail-filter",
+      "name": "Filter: Anti-Loop & Length Guardrail",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": { "responseFormat": "json_object" },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Return strict JSON: {\"intent\": \"support|sales|ops\", \"urgency\": \"low|high\", \"tool_needed\": \"notion_lookup|none\", \"draft_reply\": \"...\"}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.body.message }}"
+            }
+          ]
+        }
+      },
+      "id": "byo-llm-router",
+      "name": "BYO-Key LLM Structured Router",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [700, 280]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "YOUR_NOTION_DATABASE_ID",
+        "limit": 3
+      },
+      "id": "notion-lookup",
+      "name": "Deterministic Notion Context Lookup",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [940, 280]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { reply: $node['BYO-Key LLM Structured Router'].json.draft_reply, intent: $node['BYO-Key LLM Structured Router'].json.intent, urgency: $node['BYO-Key LLM Structured Router'].json.urgency } }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to ChatKit / Frontend",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1180, 280]
+    }
+  ],
+  "connections": {
+    "ChatKit / App Webhook Trigger": {
+      "main": [[{ "node": "Filter: Anti-Loop & Length Guardrail", "type": "main", "index": 0 }]]
+    },
+    "Filter: Anti-Loop & Length Guardrail": {
+      "main": [[{ "node": "BYO-Key LLM Structured Router", "type": "main", "index": 0 }], []]
+    },
+    "BYO-Key LLM Structured Router": {
+      "main": [[{ "node": "Deterministic Notion Context Lookup", "type": "main", "index": 0 }]]
+    },
+    "Deterministic Notion Context Lookup": {
+      "main": [[{ "node": "Respond to ChatKit / Frontend", "type": "main", "index": 0 }]]
+    }
+  }
+}

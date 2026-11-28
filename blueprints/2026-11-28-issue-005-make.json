@@ -1,0 +1,103 @@
+{
+  "name": "Zero-Fluff Ops #005 — OpenAI Agent Builder Replacement Router (BYO API Key)",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "notes": "Step 1: Receive ChatKit / app webhook payload (user_id, message, secret)."
+      }
+    },
+    {
+      "id": 2,
+      "module": "openai-gpt-3:CreateCompletion",
+      "version": 1,
+      "filter": {
+        "name": "Secret & Anti-Loop Guardrail",
+        "conditions": [
+          [
+            {
+              "a": "{{length(1.message)}}",
+              "b": "12",
+              "o": "number:greater"
+            },
+            {
+              "a": "{{1.sender_type}}",
+              "b": "bot",
+              "o": "text:notequal"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "model": "gpt-4o-mini",
+        "response_format": "json_object",
+        "messages": [
+          {
+            "role": "system",
+            "content": "Classify message into strict JSON: {\"intent\": \"support|sales|ops\", \"urgency\": \"low|high\", \"tool_needed\": \"notion_lookup|none\", \"draft_reply\": \"...\"}"
+          },
+          {
+            "role": "user",
+            "content": "{{1.message}}"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": { "x": 320, "y": 0 },
+        "notes": "Step 2-3: Filter short/bot inputs ($0 cost), then run BYO-key JSON router."
+      }
+    },
+    {
+      "id": 3,
+      "module": "notion:searchObjects",
+      "version": 1,
+      "filter": {
+        "name": "Deterministic Tool Branch",
+        "conditions": [
+          [
+            {
+              "a": "{{2.result.tool_needed}}",
+              "b": "notion_lookup",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "query": "{{1.message}}"
+      },
+      "metadata": {
+        "designer": { "x": 640, "y": 0 },
+        "notes": "Step 4: Deterministic Notion lookup without burning LLM agent steps."
+      }
+    },
+    {
+      "id": 4,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "mapper": {
+        "status": 200,
+        "body": "{\"reply\": \"{{2.result.draft_reply}}\", \"intent\": \"{{2.result.intent}}\", \"urgency\": \"{{2.result.urgency}}\"}"
+      },
+      "metadata": {
+        "designer": { "x": 960, "y": 0 },
+        "notes": "Step 5: Return structured JSON back to ChatKit / frontend and log trace."
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    },
+    "author": "Zero-Fluff Ops (zerofluffops.substack.com)"
+  }
+}

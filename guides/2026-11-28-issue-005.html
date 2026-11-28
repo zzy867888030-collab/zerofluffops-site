@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenAI Agent Builder Shuts Down in 48 Hours: Zapier vs. Make vs. n8n Migration Math | Zero-Fluff Ops</title>
+  <meta name="description" content="OpenAI Agent Builder, Evals, and v1/prompts sunset Nov 30, 2026. Why Zapier&#x27;s 3x–5x AI multipliers spike bills—plus Make &amp; n8n JSON blueprints." />
+  <link rel="canonical" href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-28-issue-005.html" />
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="../index.html">
+        <span>Zero-Fluff Ops</span>
+        <span class="brand-badge">2026 TOOLS</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../blueprints/index.html">Templates (.JSON)</a>
+        <a href="../guides/index.html">Guides</a>
+        <a class="hide-mobile" href="../compare/make-vs-zapier.html">Comparisons</a>
+        <a class="btn-nav" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Free Newsletter →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container article-wrap">
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;"><a href="index.html">← All Workflow Blueprints &amp; Guides</a> · <span>2026-11-28</span></p>
+    <h1>OpenAI Agent Builder Shuts Down in 48 Hours: Zapier vs. Make vs. n8n Migration Math</h1>
+    <p style="color:#94a3b8;font-size:17px;">OpenAI Agent Builder, Evals, and v1/prompts sunset Nov 30, 2026. Why Zapier&#x27;s 3x–5x AI multipliers spike bills—plus Make &amp; n8n JSON blueprints.</p>
+
+    <div class="blueprint-box">
+      <span class="pill" style="margin-bottom:10px;">READY-TO-IMPORT WORKFLOW TEMPLATES</span>
+      <h3>Download &amp; Run This Blueprint in 2 Minutes</h3>
+      <p>Grab the pre-configured JSON file below, then import it into Make.com (cloud visual canvas) or a 1-click self-hosted n8n server:</p>
+      <div class="cta-strip" style="margin:14px 0;">
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__MAKE_BP, '2026-11-28-issue-005-make-blueprint.json')">⬇ Download Make.com Blueprint (.json)</button>
+        <button class="dl-btn" type="button" onclick="downloadBp(window.__N8N_BP, '2026-11-28-issue-005-n8n-workflow.json')">⬇ Download n8n Workflow (.json)</button>
+      </div>
+      <div class="cta-strip" style="margin:12px 0 0;">
+        <a class="cta-btn cta-make" href="../go/make.html?src=bp-2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Step 1A: Get Make Free (10k Ops Promo) →</a>
+        <a class="cta-btn cta-vps" href="../go/vps.html?src=bp-2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Step 1B: Deploy 1-Click n8n VPS (~$6/mo) →</a>
+      </div>
+    </div>
+    <script>
+    window.__MAKE_BP = "{\n  \"name\": \"Zero-Fluff Ops #005 \u2014 OpenAI Agent Builder Replacement Router (BYO API Key)\",\n  \"flow\": [\n    {\n      \"id\": 1,\n      \"module\": \"gateway:CustomWebHook\",\n      \"version\": 1,\n      \"parameters\": {},\n      \"mapper\": {},\n      \"metadata\": {\n        \"designer\": { \"x\": 0, \"y\": 0 },\n        \"notes\": \"Step 1: Receive ChatKit / app webhook payload (user_id, message, secret).\"\n      }\n    },\n    {\n      \"id\": 2,\n      \"module\": \"openai-gpt-3:CreateCompletion\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Secret & Anti-Loop Guardrail\",\n        \"conditions\": [\n          [\n            {\n              \"a\": \"{{length(1.message)}}\",\n              \"b\": \"12\",\n              \"o\": \"number:greater\"\n            },\n            {\n              \"a\": \"{{1.sender_type}}\",\n              \"b\": \"bot\",\n              \"o\": \"text:notequal\"\n            }\n          ]\n        ]\n      },\n      \"mapper\": {\n        \"model\": \"gpt-4o-mini\",\n        \"response_format\": \"json_object\",\n        \"messages\": [\n          {\n            \"role\": \"system\",\n            \"content\": \"Classify message into strict JSON: {\\\"intent\\\": \\\"support|sales|ops\\\", \\\"urgency\\\": \\\"low|high\\\", \\\"tool_needed\\\": \\\"notion_lookup|none\\\", \\\"draft_reply\\\": \\\"...\\\"}\"\n          },\n          {\n            \"role\": \"user\",\n            \"content\": \"{{1.message}}\"\n          }\n        ]\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 320, \"y\": 0 },\n        \"notes\": \"Step 2-3: Filter short/bot inputs ($0 cost), then run BYO-key JSON router.\"\n      }\n    },\n    {\n      \"id\": 3,\n      \"module\": \"notion:searchObjects\",\n      \"version\": 1,\n      \"filter\": {\n        \"name\": \"Deterministic Tool Branch\",\n        \"conditions\": [\n          [\n            {\n              \"a\": \"{{2.result.tool_needed}}\",\n              \"b\": \"notion_lookup\",\n              \"o\": \"text:equal\"\n            }\n          ]\n        ]\n      },\n      \"mapper\": {\n        \"query\": \"{{1.message}}\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 640, \"y\": 0 },\n        \"notes\": \"Step 4: Deterministic Notion lookup without burning LLM agent steps.\"\n      }\n    },\n    {\n      \"id\": 4,\n      \"module\": \"gateway:WebhookRespond\",\n      \"version\": 1,\n      \"mapper\": {\n        \"status\": 200,\n        \"body\": \"{\\\"reply\\\": \\\"{{2.result.draft_reply}}\\\", \\\"intent\\\": \\\"{{2.result.intent}}\\\", \\\"urgency\\\": \\\"{{2.result.urgency}}\\\"}\"\n      },\n      \"metadata\": {\n        \"designer\": { \"x\": 960, \"y\": 0 },\n        \"notes\": \"Step 5: Return structured JSON back to ChatKit / frontend and log trace.\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"instant\": true,\n    \"version\": 1,\n    \"scenario\": {\n      \"roundtrips\": 1,\n      \"maxErrors\": 3,\n      \"autoCommit\": true\n    },\n    \"author\": \"Zero-Fluff Ops (zerofluffops.substack.com)\"\n  }\n}\n";
+    window.__N8N_BP = "{\n  \"name\": \"Zero-Fluff Ops #005 \u2014 OpenAI Agent Builder Replacement & ChatKit Backend (n8n)\",\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"httpMethod\": \"POST\",\n        \"path\": \"agent-router\",\n        \"responseMode\": \"responseNode\",\n        \"options\": {}\n      },\n      \"id\": \"webhook-trigger\",\n      \"name\": \"ChatKit / App Webhook Trigger\",\n      \"type\": \"n8n-nodes-base.webhook\",\n      \"typeVersion\": 2,\n      \"position\": [220, 300]\n    },\n    {\n      \"parameters\": {\n        \"conditions\": {\n          \"number\": [\n            {\n              \"value1\": \"={{ ($json.body.message || '').length }}\",\n              \"operation\": \"larger\",\n              \"value2\": 12\n            }\n          ],\n          \"string\": [\n            {\n              \"value1\": \"={{ $json.body.sender_type }}\",\n              \"operation\": \"notEqual\",\n              \"value2\": \"bot\"\n            }\n          ]\n        }\n      },\n      \"id\": \"guardrail-filter\",\n      \"name\": \"Filter: Anti-Loop & Length Guardrail\",\n      \"type\": \"n8n-nodes-base.if\",\n      \"typeVersion\": 1,\n      \"position\": [460, 300]\n    },\n    {\n      \"parameters\": {\n        \"model\": \"gpt-4o-mini\",\n        \"options\": { \"responseFormat\": \"json_object\" },\n        \"messages\": {\n          \"values\": [\n            {\n              \"role\": \"system\",\n              \"content\": \"Return strict JSON: {\\\"intent\\\": \\\"support|sales|ops\\\", \\\"urgency\\\": \\\"low|high\\\", \\\"tool_needed\\\": \\\"notion_lookup|none\\\", \\\"draft_reply\\\": \\\"...\\\"}\"\n            },\n            {\n              \"role\": \"user\",\n              \"content\": \"={{ $json.body.message }}\"\n            }\n          ]\n        }\n      },\n      \"id\": \"byo-llm-router\",\n      \"name\": \"BYO-Key LLM Structured Router\",\n      \"type\": \"@n8n/n8n-nodes-langchain.openAi\",\n      \"typeVersion\": 1,\n      \"position\": [700, 280]\n    },\n    {\n      \"parameters\": {\n        \"resource\": \"databasePage\",\n        \"operation\": \"getAll\",\n        \"databaseId\": \"YOUR_NOTION_DATABASE_ID\",\n        \"limit\": 3\n      },\n      \"id\": \"notion-lookup\",\n      \"name\": \"Deterministic Notion Context Lookup\",\n      \"type\": \"n8n-nodes-base.notion\",\n      \"typeVersion\": 2,\n      \"position\": [940, 280]\n    },\n    {\n      \"parameters\": {\n        \"respondWith\": \"json\",\n        \"responseBody\": \"={{ { reply: $node['BYO-Key LLM Structured Router'].json.draft_reply, intent: $node['BYO-Key LLM Structured Router'].json.intent, urgency: $node['BYO-Key LLM Structured Router'].json.urgency } }}\"\n      },\n      \"id\": \"respond-webhook\",\n      \"name\": \"Respond to ChatKit / Frontend\",\n      \"type\": \"n8n-nodes-base.respondToWebhook\",\n      \"typeVersion\": 1,\n      \"position\": [1180, 280]\n    }\n  ],\n  \"connections\": {\n    \"ChatKit / App Webhook Trigger\": {\n      \"main\": [[{ \"node\": \"Filter: Anti-Loop & Length Guardrail\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Filter: Anti-Loop & Length Guardrail\": {\n      \"main\": [[{ \"node\": \"BYO-Key LLM Structured Router\", \"type\": \"main\", \"index\": 0 }], []]\n    },\n    \"BYO-Key LLM Structured Router\": {\n      \"main\": [[{ \"node\": \"Deterministic Notion Context Lookup\", \"type\": \"main\", \"index\": 0 }]]\n    },\n    \"Deterministic Notion Context Lookup\": {\n      \"main\": [[{ \"node\": \"Respond to ChatKit / Frontend\", \"type\": \"main\", \"index\": 0 }]]\n    }\n  }\n}\n";
+    function downloadBp(content, filename) {
+      var blob = new Blob([content], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    </script>
+      <p>If you still have production workflows sitting inside OpenAI&#x27;s visual <strong>Agent Builder</strong>, you have less than <strong>48 hours</strong> to get them out.</p>
+      <p>On <strong>November 30, 2026</strong>, OpenAI permanently shuts down <strong>Agent Builder</strong> (its visual drag-and-drop canvas), the hosted <strong>Evals</strong> dashboard and API (read-only since October 31), and the reusable <strong><code>v1/prompts</code></strong> API. <strong>ChatKit</strong> stays alive as a frontend UI kit, but every hosted Agent Builder workflow ID stops responding on Monday.</p>
+      <p>The catch? OpenAI&#x27;s official export (<code>Code -&gt; Agents SDK</code>) only hands you raw Python or TypeScript boilerplate—not an importable visual graph. And if you blindly rebuild those workflows inside <strong><a href="../go/zapier.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Zapier</a></strong>, its new AI step multipliers can quietly push a 5,000-run agent workflow past <strong>$250/month</strong>.</p>
+      <p>Here is the honest 2026 migration math across OpenAI Agents SDK, <strong><a href="../go/zapier.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Zapier</a></strong>, <strong><a href="../go/make.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Make.com</a></strong>, and <strong><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a></strong>, plus a 15-minute copy-paste blueprint you can import today.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>1. What Actually Breaks on November 30, 2026</h2>
+      <p>Before moving a single node, export three assets from your OpenAI dashboard today:</p>
+      <ul>
+        <li><strong>Workflow logic (<code>Code -&gt; Agents SDK</code>):</strong> Saves your model settings and handoff structure, though app credentials, retries, and webhook plumbing must be rebuilt.</li>
+        <li><strong>Prompt templates &amp; schemas:</strong> Copy every system prompt and JSON schema out of <code>v1/prompts</code> before the endpoint retires.</li>
+        <li><strong>ChatKit endpoints:</strong> If you embed ChatKit in a product or internal portal, switch it from hosted workflow IDs to your own backend endpoint (Agents SDK, LangGraph, or <strong><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a></strong>).</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>2. The 5,000-Run Migration Cost Verdict</h2>
+      <p>Assume a standard 3-step AI agent workflow running <strong>5,000 times/month</strong>: <em>(1) classify &amp; extract JSON -&gt; (2) tool call / lookup -&gt; (3) route &amp; write to Slack or <strong><a href="../go/notion.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Notion</a></strong></em>.</p>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/zapier.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Zapier</a> — Fastest Draft, Expensive AI Multipliers</h3>
+      <p>Zapier folded standalone Zapier Agents into <strong>AI by Zapier</strong> steps—and introduced task multipliers per step: <strong>1x</strong> for Standard (no tools), <strong>3x</strong> for Advanced (now the default, with tool support), and <strong>5x</strong> for Premium reasoning. <strong>Zapier MCP</strong> calls consume <strong>2x</strong> tasks.</p>
+      <ul>
+        <li><strong>The 5,000-run math:</strong> One 3x classify step + one 5x tool-calling step + one 1x write step = <strong>9 tasks per run</strong>. At 5,000 runs/month, that burns <strong>45,000 tasks/month</strong>—pushing a solo builder from the 10K Professional tier (<strong>$129/mo</strong> annual, $193.50 monthly) up into the <strong>~$249–$289/mo</strong> (annual) 50K-task range (<strong>~$2,988–$3,468/year</strong>).</li>
+        <li><strong>The honest con:</strong> Task multipliers punish multi-step agent loops fast, and you still have to reconnect every OAuth integration manually.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/make.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Make.com</a> + BYO API Key — Best Visual Canvas Parity</h3>
+      <p>If your ops team loved Agent Builder&#x27;s visual flow, <strong><a href="../go/make.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Make.com</a></strong> gives you drag-and-drop routing, Make Grid visibility, and <strong>BYO LLM API keys</strong> on all paid plans—zero markup on OpenAI, Anthropic, or Gemini tokens.</p>
+      <ul>
+        <li><strong>The 5,000-run math:</strong> 5,000 × 3 modules = <strong>15,000 credits/month</strong>. Core (10K credits) starts at <strong>~$10.59–$12/mo</strong> annual; scaling to 20K credits plus <strong>~$10/mo</strong> in direct <code>gpt-4o-mini</code> / <code>gemini</code> API calls lands around <strong>$22–$30/month</strong> total (<strong>~$2,700+/year saved</strong> vs. Zapier 50K).</li>
+        <li><strong>The honest con:</strong> Make still bills per module execution inside array loops—skip an early Filter on a noisy webhook and wasted runs add up fast.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;"><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a> — Best 1:1 Agent + ChatKit Backend</h3>
+      <p><strong><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a></strong> bills <strong>per full workflow execution</strong>, not per node or AI multiplier—and natively includes <strong>AI Agent nodes</strong>, <strong>MCP Server Triggers</strong>, and OpenTelemetry audit tracing.</p>
+      <ul>
+        <li><strong>The 5,000-run math:</strong> Self-host Community Edition ($0 software) on a <strong><a href="../go/vps.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">1-click n8n cloud VPS</a></strong> (~$6/mo) + ~$10 direct API usage = <strong>~$16/month</strong>. Prefer zero server maintenance? <strong><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a></strong> Cloud Starter is <strong>$20/mo</strong> annual (2,500 executions) and Cloud Pro is <strong>$50/mo</strong> annual (10,000 executions), totaling <strong>~$60/month</strong> with API tokens.</li>
+        <li><strong>The honest con:</strong> Self-hosting puts Docker updates and SSL backups on your plate, and Cloud Starter&#x27;s 2,500-execution cap forces a jump to Pro ($50/mo) once volume grows.</li>
+      </ul>
+      <h3 style="margin:20px 0 8px;font-size:18px;">OpenAI Agents SDK + Promptfoo — Best for Pure App Code</h3>
+      <ul>
+        <li><strong>The 5,000-run math:</strong> <strong>$0</strong> orchestration license; pay only raw API tokens (~$10/mo) + lightweight hosting ($6–$20/mo). Replace OpenAI Evals with open-source <strong>Promptfoo</strong> in CI.</li>
+        <li><strong>The honest con:</strong> Zero visual debugging or prebuilt SaaS connectors—every Slack, HubSpot, and Notion retry handler lives in your codebase.</li>
+      </ul>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <h2>3. Copy-Paste Recipe: 15-Minute Agent Builder Replacement Blueprint</h2>
+      <p>Skip rewriting brittle webhook boilerplate. Import this 5-step pattern into <strong><a href="../go/make.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Make.com</a></strong> or <strong><a href="../go/n8n.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">n8n</a></strong> (you can download both ready-to-import <code>.json</code> files in our <a href="https://jolly-heart-7a83.zzy867888030.workers.dev/guides/2026-11-28-issue-005.html" target="_blank" rel="noopener sponsored">Issue #005 Blueprint Guide</a>):</p>
+      <ol>
+        <li><strong>Webhook / ChatKit Trigger:</strong> Accept incoming JSON (<code>user_id</code>, <code>message</code>, <code>channel</code>) and validate a shared header secret before touching any LLM.</li>
+        <li><strong>Guardrail Filter:</strong> Reject empty payloads, messages under 12 characters, or bot-originated events immediately so loops cost <strong>$0</strong>.</li>
+        <li><strong>Structured Router (BYO API Key):</strong> Call <code>gpt-4o-mini</code> or <code>claude-3-5-haiku</code> with strict JSON output (<code>intent</code>, <code>urgency</code>, <code>tool_needed</code>, <code>draft_reply</code>).</li>
+        <li><strong>Deterministic Tool Branch:</strong> Route <code>tool_needed</code> to a real database lookup (<strong><a href="../go/notion.html?src=2026-11-28-issue-005" target="_blank" rel="noopener sponsored">Notion</a></strong> or CRM) via standard API nodes—never burn reasoning tokens on static lookups.</li>
+        <li><strong>Log, Audit &amp; Reply:</strong> Write the trace (<code>intent</code>, model, latency) to Notion or OpenTelemetry, return the reply to ChatKit/Slack, and alert a human only when <code>urgency == high</code>.</li>
+      </ol>
+      <p><strong>Result:</strong> You replace a dying Agent Builder flow in <strong>15 minutes</strong>, cut monthly run costs by <strong>80%–93%</strong> vs. multiplied Zapier tasks, and own your prompts and logs permanently.</p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Still migrating workflows before Monday&#x27;s November 30 cutoff? Hit reply with your node count and monthly runs—I&#x27;ll tell you whether Make, n8n, or raw Agents SDK is cheapest for your setup.</em></p>
+      <hr style="border:0;border-top:1px solid #26334d;margin:28px 0;" />
+      <p><em>Disclosure: Some links in this issue are affiliate links, meaning I may earn a small commission at no extra cost to you if you choose to upgrade. I only feature tools I actually test and recommend for real workflows.</em></p>
+
+    <div class="newsletter-box" style="margin-top:36px;">
+      <h2>Get New Tested Blueprints Twice a Week</h2>
+      <p>Join <strong>Zero-Fluff Ops</strong> free on Substack for real cost math, honest tool verdicts, and copy-paste JSON workflows.</p>
+      <div class="cta-strip" style="justify-content:center;margin-bottom:0;">
+        <a class="btn-primary" href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Subscribe Free on Substack →</a>
+        <a class="cta-btn cta-neutral" href="../index.html">Model Your Cost in Calculator →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div><strong>Zero-Fluff Ops</strong> — Practical no-code &amp; AI workflow blueprints and cost benchmarks. <a href="https://zerofluffops.substack.com" target="_blank" rel="noopener">Read the Brief</a> · <a href="../index.html">Cost Calculator</a> · <a href="../blueprints/index.html">JSON Templates</a> · <a href="../guides/index.html">Guides</a></div>
+      <p class="disclosure">Disclosure: Pricing tiers are 2026 public-plan estimates for comparison purposes. Some outbound links (including /go/ partner links) are affiliate links, meaning we may earn a commission at no extra cost to you if you upgrade. We never run paid ads on brand keywords and only recommend tools we test in real workflows.</p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "42ffdf8149ba4edf8e775fddfcb73aed"}'></script>
+  <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
